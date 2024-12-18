@@ -1,8 +1,11 @@
 import { test as base } from "@playwright/test";
 import { PlaywrightSiteActions } from "../actions/ui/playwright-site-actions";
 
-
-export const test = base.extend({
+type pageObjects = {
+    playwrightSiteActions: PlaywrightSiteActions,
+     
+}
+export const test = base.extend<pageObjects>({
     playwrightSiteActions: async({page}, use) => {
         await use(new PlaywrightSiteActions(page))
     }

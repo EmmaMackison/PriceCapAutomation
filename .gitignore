@@ -5,3 +5,5 @@ node_modules/
 /playwright/.cache/
 .idea/
 .env
+Report Output/
+CSV Output/
