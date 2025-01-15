@@ -49,13 +49,13 @@ test('DualFuel test', async ({ page }) => {
     const newDualFuelBucketData: Object[] = [];
 
     //Step:5 Navigate thorough each row,received  from Step 1: data bucket and perform calculation
-        // Declare meter category available into latest price file
+    // Declare meter category available into latest price file
     const meterCategory: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate',
         'THTC', 'Flex Rate', '2 Rate (Heating)', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',
         '1 Year Fixed Loyalty', '1 Year Fixed Loyalty Economy 7'];
-        //Step 5.1 Navigating through each record of data bucket starts here
-    for (const property in dualFuelBucket) {   
+    //Step 5.1 Navigating through each record of data bucket starts here
+    for (const property in dualFuelBucket) {
 
         //Step 5.1.1: Filtering price file according to zone of cutomer
         let customerZone = dualFuelBucket[property].Zone_1;
@@ -66,8 +66,8 @@ test('DualFuel test', async ({ page }) => {
         //Step 5.1.2: Filtering price file according to Meter type
         if (zoneBasedPriceData.length) {
             //Capturing Electric Meter type
-            let eMeter = '';
-            let eleTariffName = dualFuelBucket[property].Elec_Tariff_Name;
+            let eMeter:string = '';
+            let eleTariffName:string = dualFuelBucket[property].Elec_Tariff_Name;
             if (eleTariffName === 'Simpler Energy' || eleTariffName === 'Warmer Home Plan' || eleTariffName === 'Pay As You Go') { eleTariffName = 'Standard'; }
             else {
                 meterCategory.forEach((element) => {
@@ -81,9 +81,10 @@ test('DualFuel test', async ({ page }) => {
                     eMeter = eleTariffName;
                 }
             }
+
             //Capturing Gas Meter Type
-            let gMeter = '';
-            let gasTariffName = dualFuelBucket[property].Gas_Tariff_Name;
+            let gMeter:string = '';
+            let gasTariffName:string = dualFuelBucket[property].Gas_Tariff_Name;
 
             if (gasTariffName === 'Simpler Energy' || gasTariffName === 'Warmer Home Plan' || gasTariffName === 'Pay As You Go') { gasTariffName = 'Standard'; }
             else {
@@ -105,6 +106,7 @@ test('DualFuel test', async ({ page }) => {
                 meterBasedPriceData = zoneBasedPriceData.filter(function (el) {
                     return (el[3] === eMeter) || (el[3] === gMeter && el[4] === 'Gas');
                 });
+                console.log(meterBasedPriceData);
             }
 
             if (meterBasedPriceData.length) {
@@ -130,9 +132,9 @@ test('DualFuel test', async ({ page }) => {
 
                 if (finalPriceData.length) {
                     //All calculation should go here
-                    let standardElectricPrice = finalPriceData.filter(newPrice => newPrice[4] === 'Electric');
-                    const standardGasPrice = finalPriceData.filter(newPrice => newPrice[4] === 'Gas');
-                    if (standardElectricPrice.length && standardGasPrice.length) {
+                    const standardElectricPrice = finalPriceData.filter(newPrice => newPrice[4] === 'Electric');
+
+                    if (standardElectricPrice.length) {
 
                         // Ele Single objects starts here
                         const eleProofingSheetObject: ProofingObject & { [key: string]: any } = {
@@ -141,11 +143,11 @@ test('DualFuel test', async ({ page }) => {
                             GSP: dualFuelBucket[property].Zone_1,
                             Fuel: 'Electric',
 
-                            NewSC: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewStandingChargeCorrect:'',
-                            NewRate1: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewRate1Correct: '',
-                            NewRate2: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewRate2Correct: '',
-                            NewRate3: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewRate3Correct: '',
-                            NewRate4: dualFuelBucket[property].Elec_New_Unit_4_Inc_VAT, NewRate4Correct: '',
+                            NewSC: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewStandingChargeCorrect: standardElectricPrice[0][13.0000],
+                            NewRate1: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewRate1Correct: standardElectricPrice[0][17.0000],
+                            NewRate2: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewRate2Correct: standardElectricPrice[0][20.0000],
+                            NewRate3: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewRate3Correct: standardElectricPrice[0][23.0000],
+                            NewRate4: dualFuelBucket[property].Elec_New_Unit_4_Inc_VAT, NewRate4Correct: standardElectricPrice[0][26.0000],
 
                             OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
                             NewAnnualCost: dualFuelBucket[property].Elec_Total_New_Cost,
@@ -165,6 +167,14 @@ test('DualFuel test', async ({ page }) => {
                         }
                         newDualFuelBucketData.push(eleProofingSheetObject);
                         //Single Ele Object finish here
+
+
+                    }
+                    else {
+                        console.log(`Account Number ${dualFuelBucket[property].Elec_Customer_No} Excluded from calculation`);
+                    }
+                    const standardGasPrice = finalPriceData.filter(newPrice => newPrice[4] === 'Gas');
+                    if (standardGasPrice.length) {
                         //Single Gas object start here  
                         const gasProofingSheetObject: ProofingObject & { [key: string]: any } = {
 
@@ -172,8 +182,8 @@ test('DualFuel test', async ({ page }) => {
                             GSP: dualFuelBucket[property].Zone_1,
                             Fuel: 'Gas',
 
-                            NewSC: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewStandingChargeCorrect: '',
-                            NewRate1: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewRate1Correct: '',
+                            NewSC: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewStandingChargeCorrect:standardGasPrice[0][13.0000],
+                            NewRate1: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewRate1Correct:standardGasPrice[0][17.0000],
                             NewRate2: 'N/A', NewRate2Correct: 'N/A',
                             NewRate3: 'N/A', NewRate3Correct: 'N/A',
                             NewRate4: 'N/A', NewRate4Correct: 'N/A',
@@ -197,11 +207,11 @@ test('DualFuel test', async ({ page }) => {
 
                         newDualFuelBucketData.push(gasProofingSheetObject);
                         //Single Gas Object finish here
-
                     }
                     else {
-                        console.log(`Account Number ${dualFuelBucket[property].Elec_Customer_No} excluded from calculation`);
+                        console.log(`Account Number ${dualFuelBucket[property].Gas_Customer_No} Excluded from Calculation`);
                     }
+
                 }
                 else {
                     console.log(`Payment Method missing for Account Number ${dualFuelBucket[property].Elec_Customer_No}`);
@@ -212,7 +222,7 @@ test('DualFuel test', async ({ page }) => {
             }
         }
         else {
-            console.log(`zone missing for Account Number ${dualFuelBucket[property].Elec_Customer_No}`);
+            console.log(`zone missing for Ele A/c${dualFuelBucket[property].Elec_Customer_No} Gas A/c ${dualFuelBucket[property].Gas_Customer_No} `);
         }
     }
 

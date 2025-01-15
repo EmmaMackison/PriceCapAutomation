@@ -5,16 +5,16 @@ import { convertArrayToCSV } from 'convert-array-to-csv';
 import { annotate } from '../../src/utils/shared/annotate.ts';
 
 test('DualFuel test', async ({ page }) => {
-    // Step 1: Read the databucket file
+    // Step 1: Below section will read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Simpler Energy - Multi-Rate - Dual Fuel - On Demand - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Split Tariff - Dual Fuel - Direct Debit - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
 
     })
 
-    //Step2:Read the latest price 
+    //Step2:Below code will read the price file 
     annotate('Getting price data');
     const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Jan2025Price.csv"), {
         columns: true,
@@ -22,12 +22,31 @@ test('DualFuel test', async ({ page }) => {
         //delimiter: ";",
     })
 
-    //Step 3: Declare new Proofing Object prototype 
+    //Declare new objects to be created
+    interface DualFuelProofingSpreadsheetObject {
+
+        EleAccountNo: number, GasAccountNumber?: number, GSP: string,
+
+        EleNewSC: number, EleNewStandingChargeCorrect: string,
+        EleNewRate1: number, NewUnitRate1Correct: string,
+        EleNewRate2: number, NewUnitRate2Correct: string,
+        EleNewRate3: number, NewUnitRate3Correct: string,
+        EleNewRate4: number, NewUnitRate4Correct: string,
+
+        GasNewRate: number, NewGasRateCorrect: string,
+        GasNewSC: number, GasNewStandingChargeCorrect: string,
+
+        EleOldAnnualCost: number, EleNewAnnualCost: number, ElePdfProj: number, EleManualProj: number, ElDiff: number,
+        EleChangeDiff: number, EleChangeAmountCorrect: string,
+
+        GasOldAnnualCost: number, GasNewAnnualCost: number, GasPdfProj: number, GasManualProj: number, GasDiff: number,
+        GasChangeDiff: number, GasChangeAmountCorrect: string,
+    }
 
     interface ProofingObject {
 
         Account: number, GSP: string,
-        Fuel: string,
+        Fuel:string,
         NewSC: number, NewStandingChargeCorrect: string,
         NewRate1: number, NewRate1Correct: string,
         NewRate2: any, NewRate2Correct: string,
@@ -45,28 +64,28 @@ test('DualFuel test', async ({ page }) => {
 
     }
 
-    //Step:4 Declare an object to store and generate new csv with calculation
-    const newDualFuelBucketData: Object[] = [];
+    //Step: 4 Navigate thorough each row from origial data bucket and perform calculation
+    const newDualFuelBucketData: Object[] = []; //This object is to store and generat csv at the end after all calculation complete
 
-    //Step:5 Navigate thorough each row,received  from Step 1: data bucket and perform calculation
-        // Declare meter category available into latest price file
+
     const meterCategory: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate',
         'THTC', 'Flex Rate', '2 Rate (Heating)', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',
         '1 Year Fixed Loyalty', '1 Year Fixed Loyalty Economy 7'];
-        //Step 5.1 Navigating through each record of data bucket starts here
-    for (const property in dualFuelBucket) {   
 
-        //Step 5.1.1: Filtering price file according to zone of cutomer
+    for (const property in dualFuelBucket) {   //Navigating through each record of data bucket starts here
+
+        //Below code is to make sure customer got zone value  is in data file  and its matching to predefined values
         let customerZone = dualFuelBucket[property].Zone_1;
         let zoneBasedPriceData = newPriceData.filter(function (el) {
             return el[5] === customerZone;
         });
 
-        //Step 5.1.2: Filtering price file according to Meter type
-        if (zoneBasedPriceData.length) {
-            //Capturing Electric Meter type
+
+        if (zoneBasedPriceData.length) {//If customer data got information about zone then move forward and look for thier meter type
+
             let eMeter = '';
+
             let eleTariffName = dualFuelBucket[property].Elec_Tariff_Name;
             if (eleTariffName === 'Simpler Energy' || eleTariffName === 'Warmer Home Plan' || eleTariffName === 'Pay As You Go') { eleTariffName = 'Standard'; }
             else {
@@ -76,12 +95,13 @@ test('DualFuel test', async ({ page }) => {
                     }
                 });
             }
+
             for (const prop in zoneBasedPriceData) {
                 if (eleTariffName === zoneBasedPriceData[prop][3]) {
                     eMeter = eleTariffName;
                 }
             }
-            //Capturing Gas Meter Type
+
             let gMeter = '';
             let gasTariffName = dualFuelBucket[property].Gas_Tariff_Name;
 
@@ -93,6 +113,7 @@ test('DualFuel test', async ({ page }) => {
                     }
                 })
             }
+
             for (const prop in zoneBasedPriceData) {
                 if (gasTariffName === zoneBasedPriceData[prop][3]) {
                     gMeter = gasTariffName;
@@ -134,14 +155,52 @@ test('DualFuel test', async ({ page }) => {
                     const standardGasPrice = finalPriceData.filter(newPrice => newPrice[4] === 'Gas');
                     if (standardElectricPrice.length && standardGasPrice.length) {
 
-                        // Ele Single objects starts here
+                        /*const proofingSheetObject: DualFuelProofingSpreadsheetObject & { [key: string]: any } = {
+
+
+                            EleAccountNo: dualFuelBucket[property].Elec_Customer_No,
+                            GasAccountNumber: dualFuelBucket[property].Gas_Customer_No,
+                            GSP: dualFuelBucket[property].Zone_1,
+
+                            EleNewSC: dualFuelBucket[property].Elec_New_Stdg_Chrg, EleNewStandingChargeCorrect: '',
+                            EleNewRate1: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewUnitRate1Correct: '',
+                            EleNewRate2: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewUnitRate2Correct: '',
+                            EleNewRate3: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewUnitRate3Correct: '',
+                            EleNewRate4: dualFuelBucket[property].Elec_New_Unit_4_Inc_VAT, NewUnitRate4Correct: '',
+
+                            GasNewRate: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewGasRateCorrect: '',
+                            GasNewSC: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, GasNewStandingChargeCorrect: '',
+
+                            EleOldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
+                            EleNewAnnualCost: dualFuelBucket[property].Elec_Total_New_Cost,
+                            EleChangeDiff: dualFuelBucket[property].Elec_Total_Old_Cost - dualFuelBucket[property].Elec_Total_New_Cost,
+                            EleChangeAmountCorrect: '',
+                            ElePdfProj: dualFuelBucket[property].Elec_Total_New_Cost,
+
+                            EleManualProj: Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000'])),
+                            ElDiff: (dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) / (dualFuelBucket[property].Elec_Total_New_Cost),
+
+
+                            GasOldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
+                            GasNewAnnualCost: dualFuelBucket[property].Gas_Total_New_Cost,
+                            GasChangeDiff: dualFuelBucket[property].Gas_Total_Old_Cost - dualFuelBucket[property].Gas_Total_New_Cost,
+                            GasChangeAmountCorrect: '',
+                            GasPdfProj: dualFuelBucket[property].Gas_Total_New_Cost,
+
+                            GasManualProj: Math.round((dualFuelBucket[property].Gas_Annual_Usage * standardGasPrice[0]['17.0000']) + (365 * standardGasPrice[0]['13.0000'])),
+                            GasDiff: (dualFuelBucket[property].Gas_Annual_Usage * standardGasPrice[0]['17.0000']) / (dualFuelBucket[property].Gas_Total_New_Cost),
+
+                        }
+                        newDualFuelBucketData.push(proofingSheetObject);
+                        */
+                        // Single objects starts here
                         const eleProofingSheetObject: ProofingObject & { [key: string]: any } = {
 
-                            Account: dualFuelBucket[property].Elec_Customer_No,
+                            Account: dualFuelBucket[property].Elec_Customer_No,                          
                             GSP: dualFuelBucket[property].Zone_1,
-                            Fuel: 'Electric',
+                            Fuel:'Electric',
 
-                            NewSC: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewStandingChargeCorrect:'',
+                            NewSC: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewStandingChargeCorrect: '',
                             NewRate1: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewRate1Correct: '',
                             NewRate2: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewRate2Correct: '',
                             NewRate3: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewRate3Correct: '',
@@ -163,20 +222,20 @@ test('DualFuel test', async ({ page }) => {
                             Comments: '',
 
                         }
-                        newDualFuelBucketData.push(eleProofingSheetObject);
+                         newDualFuelBucketData.push(eleProofingSheetObject);
                         //Single Ele Object finish here
                         //Single Gas object start here  
                         const gasProofingSheetObject: ProofingObject & { [key: string]: any } = {
-
+                            
                             Account: dualFuelBucket[property].Gas_Customer_No,
                             GSP: dualFuelBucket[property].Zone_1,
-                            Fuel: 'Gas',
-
+                            Fuel:'Gas',
+                            
                             NewSC: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewStandingChargeCorrect: '',
                             NewRate1: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewRate1Correct: '',
-                            NewRate2: 'N/A', NewRate2Correct: 'N/A',
-                            NewRate3: 'N/A', NewRate3Correct: 'N/A',
-                            NewRate4: 'N/A', NewRate4Correct: 'N/A',
+                            NewRate2:'N/A', NewRate2Correct: 'N/A',
+                            NewRate3:'N/A', NewRate3Correct: 'N/A',
+                            NewRate4:'N/A', NewRate4Correct: 'N/A',
 
                             OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
                             NewAnnualCost: dualFuelBucket[property].Gas_Total_New_Cost,
