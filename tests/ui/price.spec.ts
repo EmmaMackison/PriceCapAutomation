@@ -7,7 +7,7 @@ import { annotate } from '../../src/utils/shared/annotate.ts';
 test('DualFuel test', async ({ page }) => {
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Simpler Energy - Multi-Rate - Dual Fuel - On Demand - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Warmer Home Plan - Multi-Rate - Dual Fuel - On Demand - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
