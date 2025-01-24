@@ -11,7 +11,7 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Simpler Energy - Dual Fuel - On Demand - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Warmer Home Plan - Multi-Rate - Dual Fuel - On Demand - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
@@ -70,7 +70,7 @@ test('DualFuel test', async ({ page }) => {
         'THTC', 'Flex Rate', '2 Rate (Heating)', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',
     ];
-    const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity'];
+    const standardMeters = ['Simpler', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity'];
     const twoRateMeters = ['2 rate', 'Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)',
         'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7'];
     const threeRateMeters = ['3 rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)', 'Economy & Heating Load', 'Heatwise 3 Rate', 'Region Specific'];
@@ -98,7 +98,6 @@ test('DualFuel test', async ({ page }) => {
                     cheapestSimilarEle = element; similarChecker = false;
                 }
             });
-
             if (similarChecker) {
                 if ((cheapestSimilarEle === 'Simpler Energy' || cheapestSimilarEle === 'Warmer Home Plan' || cheapestSimilarEle === 'Pay As You Go')) { cheapestSimilarEle = 'Standard'; }
                 else {
@@ -107,30 +106,25 @@ test('DualFuel test', async ({ page }) => {
                     });
                 }
             }
-
-
             for (const prop in zoneBasedPriceData) {
                 if (cheapestSimilarEle === zoneBasedPriceData[prop][3]) { cheapestSimilarEleMeter = cheapestSimilarEle; }
-                else { cheapestSimilarEle === ''; }
+               // else { cheapestSimilarEle === ''; }
             }
-
             let CheapestEleSimilarPriceData: any[] = [];
             if (cheapestSimilarEleMeter !== '') {
 
                 CheapestEleSimilarPriceData = zoneBasedPriceData.filter(function (el) {
-
                     return (el[3] === cheapestSimilarEleMeter && el[4] === 'Electric');
                 }
                 );
             }
-
             //Cheapest Similar calculation complete here
-
             //Capturing cheapest overall
             let cheapestOverallEleMeter = '';
             let cheapestOverallEle = dualFuelBucket[property].Elec_Cheapest_Overall_Tariff;
-            let replaceCheapestOverall = cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '');
             let overallChecker = true;
+            let replaceCheapestOverall = cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '');
+           
 
             cheapestTariffs.forEach((element) => {
                 let ele = element.replace(/[^a-zA-Z0-9]/g, '');
@@ -148,21 +142,18 @@ test('DualFuel test', async ({ page }) => {
                     });
                 }
             }
-
             for (const prop in zoneBasedPriceData) {
                 if (cheapestOverallEle === zoneBasedPriceData[prop][3]) {
                     cheapestOverallEleMeter = cheapestOverallEle;
                 }
+               // else { cheapestOverallEleMeter = ''; }     //Changed toay         
             }
-
             let cheapestEleOverallPriceData: any[] = [];
             if (cheapestOverallEleMeter !== '') {
                 cheapestEleOverallPriceData = zoneBasedPriceData.filter(function (el) {
                     return (el[3] === cheapestOverallEleMeter && el[4] === 'Electric');
                 });
             }
-
-
             //Calculation for Cheapest overall complete here
             //Capturing current Electric Meter type
             let eMeter: string = '';
@@ -182,30 +173,34 @@ test('DualFuel test', async ({ page }) => {
                         eMeter = eleTariffName;
                     }
                 }
-                //Capturing for current tarriff complete here
+               
                 let eleMeterBasedPriceData = [];
                 if (eMeter !== '') {
                     eleMeterBasedPriceData = zoneBasedPriceData.filter(function (el) {
                         return (el[3] === eMeter);
                     });
                 }
-
-
+                 //Capturing for current tarriff complete here
+                 //Now capturing new price based on the payment method
                 if (eleMeterBasedPriceData.length) {
+                    //Capturing cheapest similar and overall  prices based on the payment method
+                    /* as per the current logic if customer is paying by prepayment than we should not offer ondemand or dd as payment method and cheapest similar
+                    and overall,if cutomer is on demand than cheapest similar and overall would be direct debit, if customer current pay method is DD than cheapest
+                    similar and overall will be DD*/
                     const elePaymentMethod = dualFuelBucket[property].Elec_Payment_Method;
                     let cheapestSimilarPaymentMethod = '';
                     let cheapestOverallPaymentMethod = '';
                     if (elePaymentMethod !== 'Prepayment') { cheapestSimilarPaymentMethod = 'Direct Debit', cheapestOverallPaymentMethod = 'Direct Debit'; }
                     else { cheapestSimilarPaymentMethod = 'Prepayment'; cheapestOverallPaymentMethod = 'Prepayment'; }
+                    //getting final prices  for cheapest similar
                     let finalCheapestSimilarData = CheapestEleSimilarPriceData.filter(function (el) {
                         return el[10] === cheapestSimilarPaymentMethod;
                     });
-                    ;
-
+                    //getting final prices for cheapet overall 
                     let finalCheapestOverallData = cheapestEleOverallPriceData.filter(function (el) {
                         return el[10] === cheapestOverallPaymentMethod;
                     });
-
+                    //getting prices for current tarrif
                     let elePayMethod = '';
                     for (const prop in eleMeterBasedPriceData) {
                         if (elePaymentMethod === eleMeterBasedPriceData[prop][10]) {
@@ -217,106 +212,96 @@ test('DualFuel test', async ({ page }) => {
                     });
 
                     if (eleFinalPriceData.length) {
-
                         //All calculation should go here
                         const standardElectricPrice = eleFinalPriceData.filter(newPrice => newPrice[4] === 'Electric');
                         if (standardElectricPrice.length) {
-
                             /*const ePass = () => {
-
                                 if (Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4) === Number(standardElectricPrice[0]['13.0000']).toFixed(4)) {
                                     return 'Pass';
                                 }
                                 else {
-
                                     return 'Fail';
                                 }
                             }*/
 
-                            function stdardTotalCalcualtion(): number {
-
-                                let stMeter = standardElectricPrice[0][3];//this would be actual eMeter for this customer    
-
-                                let switchMeterDecider = '';
-                                let meterChecker = true;
-                                let returnValue = 0;
-                                standardMeters.forEach((element) => {
-                                    if (element === stMeter) { switchMeterDecider = 'Standard'; meterChecker = false; }
+                            let stMeter = standardElectricPrice[0][3];//this would be actual eMeter for this customer                         
+                            let switchMeterDecider = '';
+                            let meterChecker = true;
+                            let returnValue = 0;
+                            standardMeters.forEach((element) => {
+                                if (element === stMeter) { switchMeterDecider = 'Standard'; meterChecker = false; }
+                            });
+                            if (meterChecker === true) {
+                                twoRateMeters.forEach((element) => {
+                                    if (element === stMeter) { switchMeterDecider = 'TwoRate'; meterChecker = false; }
                                 });
-                                if (meterChecker === true) {
-                                    twoRateMeters.forEach((element) => {
-                                        if (element === stMeter) { switchMeterDecider = 'TwoRate'; meterChecker = false; }
-                                    });
-                                }
-                                if (meterChecker === true) {
-                                    threeRateMeters.forEach((element) => {
-                                        if (element === stMeter) { switchMeterDecider = 'ThreeRate'; meterChecker = false; }
-                                    });
-                                }
-                                if (meterChecker === true) {
-                                    if (fourRateMeters === stMeter) { switchMeterDecider = 'FourRate'; meterChecker = false; }
-
-                                }
-
-                                switch (switchMeterDecider) {
-
-                                    case 'Standard':
-                                        const totalCurrentCost = () => {
-                                            let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
-                                            let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            returnValue = Number((rate1 + standingCharge).toFixed(2));
-                                            //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
-                                        }
-                                        totalCurrentCost();
-
-                                        break;
-                                    /*case 'TwoRate':
-                                        const totalTwoRateCurrentCost = () => {
-                                            let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
-                                            let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            let rate2 = Number(standardElectricPrice[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            // returnValue = rate1 + rate2 + standingCharge;
-                                            returnValue = Number((rate1 + rate2 + standingCharge).toFixed(2));
-                                            //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
-                                        }
-                                        totalTwoRateCurrentCost();
-                                        break;
-                                    case 'ThreeRate':
-                                        const totalThreeRateCurrentCost = () => {
-                                            let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
-                                            let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            let rate2 = Number(standardElectricPrice[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            let rate3 = Number(standardElectricPrice[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            //returnValue = rate1 + rate2 + rate3 + standingCharge;
-                                            returnValue = Number((rate1 + rate2 + rate3 + standingCharge).toFixed(2));
-                                            //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
-                                        }
-                                        totalThreeRateCurrentCost();
-                                        break;
-                                    case 'FourRate':
-                                        const totalFourRateCurrentCost = () => {
-                                            let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
-                                            let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            let rate2 = Number(standardElectricPrice[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            let rate3 = Number(standardElectricPrice[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            let rate4 = Number(standardElectricPrice[0]['26.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                            // returnValue = rate1 + rate2 + rate3 + rate4 + standingCharge;
-                                            returnValue = Number((rate1 + rate2 + rate3 + rate4 + standingCharge).toFixed(2));
-                                            //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
-
-                                        }
-                                        totalFourRateCurrentCost();
-                                        break;*/
-                                    default:
-                                        console.log('Default total would be 0');
-                                }
-                                return returnValue;
                             }
-                            function stdardTotalSimilarCalcualtion(): number {
-                                let similarMeter = finalCheapestSimilarData[0][3];//This would be actual similar meter for this customer                               
-                                let similarSwitchMeterDecider = '';
+                            if (meterChecker === true) {
+                                threeRateMeters.forEach((element) => {
+                                    if (element === stMeter) { switchMeterDecider = 'ThreeRate'; meterChecker = false; }
+                                });
+                            }
+                            if (meterChecker === true) {
+                                if (fourRateMeters === stMeter) { switchMeterDecider = 'FourRate'; meterChecker = false; }
+
+                            }
+
+                            switch (switchMeterDecider) {
+
+                                case 'Standard':
+                                    const totalCurrentCost = () => {
+                                        let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
+                                        let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        returnValue = Number((rate1 + standingCharge).toFixed(2));
+                                        //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
+                                    }
+                                    totalCurrentCost();
+                                    break;
+                                /*case 'TwoRate':
+                                    const totalTwoRateCurrentCost = () => {
+                                        let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
+                                        let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        let rate2 = Number(standardElectricPrice[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                        
+                                        returnValue = Number((rate1 + rate2 + standingCharge).toFixed(2));                                      
+                                    }
+                                    totalTwoRateCurrentCost();
+                                    break;
+                                case 'ThreeRate':
+                                    const totalThreeRateCurrentCost = () => {
+                                        let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
+                                        let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        let rate2 = Number(standardElectricPrice[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        let rate3 = Number(standardElectricPrice[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        //returnValue = rate1 + rate2 + rate3 + standingCharge;
+                                        returnValue = Number((rate1 + rate2 + rate3 + standingCharge).toFixed(2));
+                                        //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
+                                    }
+                                    totalThreeRateCurrentCost();
+                                    break;
+                                case 'FourRate':
+                                    const totalFourRateCurrentCost = () => {
+                                        let standingCharge = 365 * Number(standardElectricPrice[0]['13.0000']);
+                                        let rate1 = Number(standardElectricPrice[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        let rate2 = Number(standardElectricPrice[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        let rate3 = Number(standardElectricPrice[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        let rate4 = Number(standardElectricPrice[0]['26.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                        // returnValue = rate1 + rate2 + rate3 + rate4 + standingCharge;
+                                        returnValue = Number((rate1 + rate2 + rate3 + rate4 + standingCharge).toFixed(2));
+                                        //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
+
+                                    }
+                                    totalFourRateCurrentCost();
+                                    break;*/
+                                default:                                    
+                            }
+                            let similarMeter = '';
+                            let similarReturnTotalCost = 0;
+                            let similarSwitchMeterDecider = '';
+                            if (finalCheapestSimilarData.length) {
+                                similarMeter = finalCheapestSimilarData[0][3];//This would be actual similar meter for this customer                               
+                                //let similarSwitchMeterDecider = '';
                                 let SimilarMeterChecker = true;
-                                let returnValue = 0;
+                                //  let returnValue = 0;
                                 standardMeters.forEach((element) => {
                                     if (element === similarMeter) { ; similarSwitchMeterDecider = 'Standard'; SimilarMeterChecker = false; }
                                 });
@@ -340,22 +325,19 @@ test('DualFuel test', async ({ page }) => {
                                             if (finalCheapestSimilarData.length) {
                                                 let standingCharge = 365 * Number(finalCheapestSimilarData[0]['13.0000']);
                                                 let rate1 = Number(finalCheapestSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                //returnValue = rate1 + standingCharge;
-                                                returnValue = Number((rate1 + standingCharge).toFixed(2));
-                                            } else { returnValue = 0; }
+                                                similarReturnTotalCost = Number((rate1 + standingCharge).toFixed(2));
+                                            } else { similarReturnTotalCost = 0; }
                                         }
                                         totalCheapestSimilarCost();
-
                                         break;
                                     /*case 'TwoRate':
                                         const totalCheapestSimilarTwoRateCost = () => {
                                             if (finalCheapestSimilarData.length) {
                                                 let standingCharge = 365 * Number(finalCheapestSimilarData[0]['13.0000']);
                                                 let rate1 = Number(finalCheapestSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate2 = Number(finalCheapestSimilarData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                // returnValue = rate1 + rate2 + standingCharge;
-                                                returnValue = Number((rate1 + rate2 + standingCharge).toFixed(2));
-                                            } else { returnValue = 0; }
+                                                let rate2 = Number(finalCheapestSimilarData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                                
+                                                similarReturnTotalCost = Number((rate1 + rate2 + standingCharge).toFixed(2));
+                                            } else { similarReturnTotalCost = 0; }
                                         }
                                         totalCheapestSimilarTwoRateCost();
                                         break;
@@ -365,10 +347,9 @@ test('DualFuel test', async ({ page }) => {
                                                 let standingCharge = 365 * Number(finalCheapestSimilarData[0]['13.0000']);
                                                 let rate1 = Number(finalCheapestSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
                                                 let rate2 = Number(finalCheapestSimilarData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate3 = Number(finalCheapestSimilarData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                //returnValue = rate1 + rate2 + rate3 + standingCharge;
-                                                returnValue = Number((rate1 + rate2 + rate3 + standingCharge).toFixed(2));
-                                            } else { returnValue = 0; }
+                                                let rate3 = Number(finalCheapestSimilarData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                                
+                                                similarReturnTotalCost = Number((rate1 + rate2 + rate3 + standingCharge).toFixed(2));
+                                            } else { similarReturnTotalCost = 0; }
                                         }
                                         totalCheapestSimilarThreeRateCost();
                                         break;
@@ -379,25 +360,22 @@ test('DualFuel test', async ({ page }) => {
                                                 let rate1 = Number(finalCheapestSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
                                                 let rate2 = Number(finalCheapestSimilarData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
                                                 let rate3 = Number(finalCheapestSimilarData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate4 = Number(finalCheapestSimilarData[0]['26.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                // returnValue = rate1 + rate2 + rate3 + standingCharge;
-                                                returnValue = Number((rate1 + rate2 + rate3 + rate4 + standingCharge).toFixed(2));
-                                            } else { returnValue = 0; }
+                                                let rate4 = Number(finalCheapestSimilarData[0]['26.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                               
+                                                similarReturnTotalCost = Number((rate1 + rate2 + rate3 + rate4 + standingCharge).toFixed(2));
+                                            } else { similarReturnTotalCost = 0; }
                                         }
                                         totalCheapestSimilarFourRateCost();
                                         break;*/
-                                    default:
-                                        console.log('Default total would be 0');
-
-
+                                    default:                                       
                                 }
-                                return returnValue;
                             }
-                            function stdardTotalOverallCalcualtion(): number {
-                                let overallMeter = finalCheapestOverallData[0][3];//This would be actual overall meter for this customer                                                        
+                            let overallMeter = '';
+                            let returnOverallValue = 0;
+                            if (finalCheapestOverallData.length) {
+                                overallMeter = finalCheapestOverallData[0][3];//This would be actual overall meter for this customer                                                        
                                 let overallSwitchMeterDecider = '';
                                 let overallMeterChecker = true;
-                                let returnValue = 0;
+
                                 standardMeters.forEach((element) => {
                                     if (element === overallMeter) { overallSwitchMeterDecider = 'Standard'; overallMeterChecker = false; }
                                 });
@@ -413,9 +391,7 @@ test('DualFuel test', async ({ page }) => {
                                 }
                                 if (overallMeterChecker === true) {
                                     if (fourRateMeters === overallMeter) { overallSwitchMeterDecider = 'FourRate'; overallMeterChecker = false; }
-
                                 }
-
                                 switch (overallSwitchMeterDecider) {
                                     case 'Standard':
                                         const totalCheapestOverallCost = () => {
@@ -423,62 +399,55 @@ test('DualFuel test', async ({ page }) => {
                                                 let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
                                                 let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
                                                 // returnValue = rate1 + standingCharge;
-                                                returnValue = Number((rate1 + standingCharge).toFixed(2));
+                                                returnOverallValue = Number((rate1 + standingCharge).toFixed(2));
                                             }
-                                            else { returnValue = 0; }
+                                            else { returnOverallValue = 0; }
                                         }
                                         totalCheapestOverallCost();
                                         break;
-                                  /*  case 'TwoRate':
-                                        const totalCheapestOverallTwoRateCost = () => {
-                                            if (finalCheapestOverallData.length) {
-                                                let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
-                                                let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate2 = Number(finalCheapestOverallData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                // returnValue = rate1 + standingCharge;
-                                                returnValue = Number((rate1 + rate2 + standingCharge).toFixed(2));
-                                            }
-                                            else { returnValue = 0; }
-                                        }
-                                        totalCheapestOverallTwoRateCost();
-                                        break;
-                                    case 'ThreeRate':
-                                        const totalCheapestOverallThreeRateCost = () => {
-                                            if (finalCheapestOverallData.length) {
-                                                let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
-                                                let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate2 = Number(finalCheapestOverallData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate3 = Number(finalCheapestOverallData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                // returnValue = rate1 + rate2 + rate3 + standingCharge;
-                                                returnValue = Number((rate1 + rate2 + rate3 + standingCharge).toFixed(2));
-                                            }
-                                            else { returnValue = 0; }
-                                        }
-                                        totalCheapestOverallThreeRateCost();
-                                        break;
-                                    case 'FourRate':
-                                        const totalCheapestOverallFourRateCost = () => {
-                                            if (finalCheapestOverallData.length) {
-                                                let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
-                                                let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate2 = Number(finalCheapestOverallData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate3 = Number(finalCheapestOverallData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                let rate4 = Number(finalCheapestOverallData[0]['26.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
-                                                // returnValue = rate1 + rate2 + rate3 + rate4 + standingCharge;
-                                                returnValue = Number((rate1 + rate2 + rate3 + rate4 + standingCharge).toFixed(2));
-                                            }
-                                            else { returnValue = 0; }
-                                        }
-                                        totalCheapestOverallFourRateCost();
-                                        break;*/
-                                    default:
-                                        console.log('Default total would be 0');
-                                    //make all total calculation to 0
-
+                                    /*  case 'TwoRate':
+                                          const totalCheapestOverallTwoRateCost = () => {
+                                              if (finalCheapestOverallData.length) {
+                                                  let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
+                                                  let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                                  let rate2 = Number(finalCheapestOverallData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                                 
+                                                  returnOverallValue = Number((rate1 + rate2 + standingCharge).toFixed(2));
+                                              }
+                                              else { returnOverallValue = 0; }
+                                          }
+                                          totalCheapestOverallTwoRateCost();
+                                          break;
+                                      case 'ThreeRate':
+                                          const totalCheapestOverallThreeRateCost = () => {
+                                              if (finalCheapestOverallData.length) {
+                                                  let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
+                                                  let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                                  let rate2 = Number(finalCheapestOverallData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                                  let rate3 = Number(finalCheapestOverallData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                                 
+                                                  returnOverallValue = Number((rate1 + rate2 + rate3 + standingCharge).toFixed(2));
+                                              }
+                                              else { returnOverallValue = 0; }
+                                          }
+                                          totalCheapestOverallThreeRateCost();
+                                          break;
+                                      case 'FourRate':
+                                          const totalCheapestOverallFourRateCost = () => {
+                                              if (finalCheapestOverallData.length) {
+                                                  let standingCharge = 365 * Number(finalCheapestOverallData[0]['13.0000']);
+                                                  let rate1 = Number(finalCheapestOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                                  let rate2 = Number(finalCheapestOverallData[0]['20.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                                  let rate3 = Number(finalCheapestOverallData[0]['23.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);
+                                                  let rate4 = Number(finalCheapestOverallData[0]['26.0000']) * Number(dualFuelBucket[property].Elec_Annual_Usage);                                                 
+                                                  returnOverallValue = Number((rate1 + rate2 + rate3 + rate4 + standingCharge).toFixed(2));
+                                              }
+                                              else { returnOverallValue = 0; }
+                                          }
+                                          totalCheapestOverallFourRateCost();
+                                          break;*/
+                                    default:                                     
+                                  
                                 }
-                                return returnValue;
                             }
-                           
                             const eleProofingSheetObject: ProofingObject & { [key: string]: any } = {
                                 // Date: '', Checker: '', PDF: '',
                                 Account: dualFuelBucket[property].Elec_Customer_No,
@@ -487,10 +456,11 @@ test('DualFuel test', async ({ page }) => {
                                 Tariff: dualFuelBucket[property].Elec_Tariff_Name,
                                 Meter: standardElectricPrice[0]['3'],
                                 SimilarTariff: dualFuelBucket[property].Elec_Cheapest_Similar_Tariff,
-                                SimilarMeter: finalCheapestSimilarData[0]['3'],
+                                // SimilarMeter: finalCheapestSimilarData[0]['3'],
+                                SimilarMeter: similarMeter,
                                 OverallTariff: dualFuelBucket[property].Elec_Cheapest_Overall_Tariff,
-                                OverallMeter: finalCheapestOverallData[0]['3'],
-
+                                //  OverallMeter: finalCheapestOverallData[0]['3'],
+                                OverallMeter: overallMeter,
                                 // Marketing_pref: dualFuelBucket[property].Marketing_pref,
                                 //Beyond_Eligibility: dualFuelBucket[property].Beyond_Eligibility,
                                 // Creative: dualFuelBucket[property].CREATIVE,
@@ -509,16 +479,16 @@ test('DualFuel test', async ({ page }) => {
                                 ChangeDifference: Number(dualFuelBucket[property].Elec_Total_New_Cost - dualFuelBucket[property].Elec_Total_Old_Cost),
                                 ChangeAmountCorrect: '',
                                 PDFPersonalProjection: dualFuelBucket[property].Elec_Total_New_Cost,
-                                ManualCalculationProjection: stdardTotalCalcualtion(),
+                                ManualCalculationProjection: returnValue,
                                 Difference: (dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000'] / dualFuelBucket[property].Elec_Total_New_Cost),
 
-                                CheapSimilarProjection: stdardTotalSimilarCalcualtion(),
-                                CheapOverallProjection: stdardTotalOverallCalcualtion(),
+                                CheapSimilarProjection: similarReturnTotalCost,
+                                CheapOverallProjection: returnOverallValue,
 
                                 AreFrontPageCalculationCorrect: '',
-                                RelevantCheapestSaving: stdardTotalCalcualtion() - stdardTotalSimilarCalcualtion(),
+                                RelevantCheapestSaving: returnValue - similarReturnTotalCost,
                                 RelevantCheapestTariffCorrect: '',
-                                RelavantOverallSaving: stdardTotalCalcualtion() - stdardTotalOverallCalcualtion(),
+                                RelavantOverallSaving: returnValue - returnOverallValue,
                                 ActualCheapestOverallTariffCorrect: '',
                                 PresentmentCorrect: '',
                                 PassFail: '',
@@ -528,6 +498,7 @@ test('DualFuel test', async ({ page }) => {
                             newDualFuelBucketData.push(eleProofingSheetObject);
                             //Single Ele Object finish here
                         }
+
                         else {
                             console.log(` Electric Account Number ${dualFuelBucket[property].Elec_Customer_No} Excluded from calculation due to no price available`);
                         }
@@ -542,23 +513,18 @@ test('DualFuel test', async ({ page }) => {
             }
             else {
                 console.log(` Electric Account ${dualFuelBucket[property].Elec_Customer_No} Excluded from calculation as its current tarrif is fixed`);;
-            }
-
-            //Sorting price file based on payment method
-
-            //Cpatuirng Similar price data
-            //Capturing cheapest similar          
+            }                      
+            //Capturing cheapest similar gas prices         
 
             let cheapestSimilarGasMeter = '';
             let cheapestSimilarGas = dualFuelBucket[property].Gas_Cheapest_Similar_Tariff;
             let replaceGasSimilar = cheapestSimilarGas.replace(/[^a-zA-Z0-9]/g, '');
-            let similarGChecker = true;
+            let similarGChecker:boolean = true;
             cheapestTariffs.forEach((element) => {
                 let ele = element.replace(/[^a-zA-Z0-9]/g, '');
                 if (replaceGasSimilar === ele && replaceGasSimilar.length === ele.length) {
-                    cheapestSimilarGas = element;
-                    similarGChecker = false;
-                } else { similarGChecker = true; }
+                    cheapestSimilarGas = element; similarGChecker = false;
+                } //else { similarGChecker = true; }
             });
             if (similarGChecker) {
                 if ((cheapestSimilarGas === 'Simpler Energy' || cheapestSimilarGas === 'Warmer Home Plan' || cheapestSimilarGas === 'Pay As You Go')) {
@@ -569,35 +535,34 @@ test('DualFuel test', async ({ page }) => {
                         if (cheapestSimilarGas.includes(element)) {
                             cheapestSimilarGas = element;
                         }
-
                     });
                 }
             }
-
+            
             for (const prop in zoneBasedPriceData) {
                 if (cheapestSimilarGas === zoneBasedPriceData[prop][3]) {
                     cheapestSimilarGasMeter = cheapestSimilarGas;
                 }
-            }
-
+               // else{ cheapestSimilarGas ='';}
+            }            
             let cheapestGasSimilarPriceData = [];
             if (cheapestSimilarGasMeter !== '') {
-
                 cheapestGasSimilarPriceData = zoneBasedPriceData.filter(function (el) {
                     return (el[3] === cheapestSimilarGasMeter && el[4] === 'Gas');
                 });
             }
-
-            //Cheapest Similar calculation complete here
-            //Capturing cheapest overall
+           
+            //Capturing cheapest overall gas
             let cheapestOverallGasMeter = '';
             let cheapestOverallGas = dualFuelBucket[property].Gas_Cheapest_Overall_Tariff;
             let overallGChecker = true;
-            let replaceGastOverall = cheapestOverallGas.replace(/[^a-zA-Z0-9]/g, '');
+            let replaceGasOverall = cheapestOverallGas.replace(/[^a-zA-Z0-9]/g, '');
+            
             cheapestTariffs.forEach((element) => {
-                let ele = element.replace(/[^a-zA-Z0-9]/g, '');
-                if (replaceGastOverall === ele && replaceGastOverall.length === ele.length) { cheapestOverallGas = element; overallGChecker = false; }
-                else { overallGChecker = true; }
+                let ele = element.replace(/[^a-zA-Z0-9]/g, '');              
+                if (replaceGasOverall === ele && replaceGasOverall.length === ele.length) { cheapestOverallGas = element; overallGChecker = false; }
+               // else { overallGChecker = true; }
+               
             });
             if (overallGChecker) {
                 if (cheapestOverallGas === 'Simpler Energy' || cheapestOverallGas === 'Warmer Home Plan' || cheapestOverallGas === 'Pay As You Go') { cheapestOverallGas = 'Standard'; }
@@ -606,27 +571,26 @@ test('DualFuel test', async ({ page }) => {
                         if (cheapestOverallGas.includes(element)) {
                             cheapestOverallGas = element;
                         }
-
                     });
                 }
             }
-
+                       
             for (const prop in zoneBasedPriceData) {
                 if (cheapestOverallGas === zoneBasedPriceData[prop][3]) {
-                    cheapestOverallGasMeter = cheapestOverallGas;
+                    cheapestOverallGasMeter = cheapestOverallGas;  
+                                 
                 }
+                //else{cheapestOverallGas = '';}
             }
-
+           
             let cheapestGasOverallPriceData = [];
             if (cheapestOverallEleMeter !== '') {
                 cheapestGasOverallPriceData = zoneBasedPriceData.filter(function (el) {
                     return (el[3] === cheapestOverallGasMeter && el[4] === 'Gas');
                 });
-            }
+            }          
 
-            //Calculation for Cheapest overall complete here
-
-            //Capturing Gas Meter Type
+            //Capturing current Gas Meter Type
             let gMeter: string = '';
             let gasTariffName: string = dualFuelBucket[property].Gas_Tariff_Name;
             if (!gasTariffName.includes('Fixed')) {
@@ -634,19 +598,16 @@ test('DualFuel test', async ({ page }) => {
                 else {
                     gasTariffName = '';
                 }
-
                 for (const prop in zoneBasedPriceData) {
                     if (gasTariffName === zoneBasedPriceData[prop][3]) {
                         gMeter = gasTariffName;
                     }
                 }
-
                 let gasMeterBasedPriceData = [];
                 if (gMeter !== '') {
                     gasMeterBasedPriceData = zoneBasedPriceData.filter(function (el) {
                         return (el[3] === gMeter);
                     });
-
                 }
                 if (gasMeterBasedPriceData.length) {
                     const gasPaymentMethod = dualFuelBucket[property].Gas_Payment_Method;
@@ -663,23 +624,19 @@ test('DualFuel test', async ({ page }) => {
                         return el[10] === cheapestOverallGasPaymentMethod;
                     });
 
-
                     let gasPayMethod = '';
                     for (const prop1 in gasMeterBasedPriceData) {
                         if (gasPaymentMethod === gasMeterBasedPriceData[prop1][10]) {
                             gasPayMethod = gasPaymentMethod;
                         }
                     }
-
                     let gasFinalPriceData = gasMeterBasedPriceData.filter(function (el) {
                         return (el[10] === gasPayMethod);
                     });
                     if (gasFinalPriceData.length) {
                         const standardGasPrice: any[] = gasFinalPriceData.filter(newPrice => newPrice[4] === 'Gas');
                         if (standardGasPrice.length) {
-
-                            /*const gPass = () => {
-
+                            /*const gPass = () => {        
                                 if (Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat).toFixed(4) === Number(standardGasPrice[0]['13.0000']).toFixed(4)) {
                                     return 'Pass';
                                 }
@@ -690,17 +647,13 @@ test('DualFuel test', async ({ page }) => {
                             }*/
                             const totalGasCurrentCost = () => {
                                 let standingCharge = 365 * Number(standardGasPrice[0]['13.0000']);
-                                let rate1 = Number(standardGasPrice[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
-                                // return rate1 + standingCharge;
-                                return Number((rate1 + standingCharge).toFixed(2));
-                                //return Math.round((dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000']) + (365 * standardElectricPrice[0]['13.0000']))
-
+                                let rate1 = Number(standardGasPrice[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);                               
+                                return Number((rate1 + standingCharge).toFixed(2));                              
                             }
                             const totalGasSimilarCost = () => {
                                 if (finalCheapestGasSimilarData.length) {
                                     let standingCharge = 365 * Number(finalCheapestGasSimilarData[0]['13.0000']);
-                                    let rate1 = Number(finalCheapestGasSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
-                                    // return rate1 + standingCharge;
+                                    let rate1 = Number(finalCheapestGasSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);                                
                                     return Number((rate1 + standingCharge).toFixed(2));
                                 } else { return 0; }
                             }
@@ -708,14 +661,11 @@ test('DualFuel test', async ({ page }) => {
                             const totalGasOverallCost = () => {
                                 if (finalCheapestGasOverallData.length) {
                                     let standingCharge = 365 * Number(finalCheapestGasOverallData[0]['13.0000']);
-                                    let rate1 = Number(finalCheapestGasOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
-                                    //  return rate1 + standingCharge;
+                                    let rate1 = Number(finalCheapestGasOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);                                  
                                     return Number((rate1 + standingCharge).toFixed(2));
                                 }
                                 else { return 0; }
                             }
-
-
 
                             //Single Gas object start here  
                             const gasProofingSheetObject: ProofingObject & { [key: string]: any } = {
@@ -726,16 +676,13 @@ test('DualFuel test', async ({ page }) => {
                                 Tariff: dualFuelBucket[property].Gas_Tariff_Name,
                                 Meter: standardGasPrice[0]['3'],
                                 SimilarTariff: dualFuelBucket[property].Gas_Cheapest_Similar_Tariff,
-                                SimilarMeter: finalCheapestGasSimilarData[0]['3'],
-                                OverallTariff: dualFuelBucket[property].Gas_Cheapest_Similar_Tariff,
-                                OverallMeter: finalCheapestGasOverallData[0]['3'],
-
+                                SimilarMeter: cheapestSimilarGasMeter,                                                              
+                                OverallTariff: dualFuelBucket[property].Gas_Cheapest_Overall_Tariff,                                
+                                OverallMeter: cheapestOverallGasMeter,
                                 // Marketing_pref: dualFuelBucket[property].Marketing_pref,
                                 // Beyond_Eligibility: dualFuelBucket[property].Beyond_Eligibility,
                                 // Creative: dualFuelBucket[property].CREATIVE,
                                 //  Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK,
-
-
                                 NewSC: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewStandingChargeCorrect: standardGasPrice[0]['13.0000'],
                                 // PassSc: gPass(),
                                 NewRate1: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewRate1Correct: standardGasPrice[0]['17.0000'],
@@ -771,27 +718,24 @@ test('DualFuel test', async ({ page }) => {
                         else {
                             console.log(`Gas Account Number ${dualFuelBucket[property].Gas_Customer_No} Excluded from calculation due to no price available`);
                         }
-
                     }
                     else {
                         console.log(`Gas Account Excluded from Calculation, No Payment Method available for Account: ${dualFuelBucket[property].Gas_Customer_No}`);
                     }
-
-                } else {
+                }
+                else {
                     console.log(` Gas Account Excluded from Calculation,No Tariff available for Account:  ${dualFuelBucket[property].Gas_Customer_No}`);
                 }
-
             }
-
             else {
                 console.log(` Gas Excluded as current Gas tariff is fix for Accont ${dualFuelBucket[property].Gas_Customer_No}`);
-
             }
         }
         else {
             console.log(`zone missing for Ele A/c${dualFuelBucket[property].Elec_Customer_No} Gas A/c ${dualFuelBucket[property].Gas_Customer_No} `);
         }
     }
+
 
     annotate('The we should be able to generate new CSV testing file');
     // // //Below code to write final arrays to file
@@ -807,7 +751,6 @@ test('DualFuel test', async ({ page }) => {
     else {
         console.log('No CSV File generated for this Bucket due to all accounts missing required info i.e. zone,tariff,Paymentmthod..etc');
     }
-
 });
 
 
