@@ -25,27 +25,27 @@ test('DualFuel test', async ({ page }) => {
     })
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
-        // Date: string, Checker: string, PDF: string,
-        Account: number, GSP: string,
-        Fuel: string, Tariff: string, Meter: string,
-        SimilarTariff: string, SimilarMeter: string,
-        OverallTariff: string, OverallMeter: string,
-        //Marketing_pref: string, Beyond_Eligibility: string, Creative: string, Incr_Decr_Check: string,
-        NewSC: number, NewStandingChargeCorrect: string, //PassSc: string,
-        NewRate1: number, NewRate1Correct: string,
-        NewRate2: any, NewRate2Correct: string,
-        NewRate3: any, NewRate3Correct: string,
-        NewRate4: any, NewRate4Correct: string,
+        Date: string, Checker: string,
+        Account_No: number, Cust_Name_Correct: string,
+        Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
+        GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
+
+        NewSC_PIN: number, NewSC_PriceFile: any,
+        NewR1_PIN: number, NewR1_PriceFile: any,
+        /*NewR2_PIN: any, NewR2_PriceFile: any,
+        NewR3_PIN: any, NewR3_PriceFile: any,
+        NewR4_PIN: any, NewR4_PriceFile: any,*/
+        New_SC_Rates_Correct: string,
+
         OldAnnualCost: number, NewAnnualCost: number, ChangeDifference: number, ChangeAmountCorrect: String,
-        PDFPersonalProjection: number, ManualCalculationProjection: number, Difference: number,
-        CheapSimilarProjection: number, CheapOverallProjection: number,
-        AreFrontPageCalculationCorrect: string,
-        RelevantCheapestSaving: number,
-        RelavantOverallSaving: number,
-        RelevantCheapestTariffCorrect: string,
-        ActualCheapestOverallTariffCorrect: string,
-        PresentmentCorrect: string,
-        PassFail: string,
+        PIN_Personal_Projection: number, Calculated_Personal_Projection: number, Difference: number, AreFrontPageCalculationCorrect: string,
+        SimilarTariff: string, SimilarMeter: string, Cheapest_Similar_Projection: number, Cheapest_Similar_Saving: number,
+        Cheapest_Similar_Saving_Correct: string,
+        OverallTariff: string, OverallMeter: string, Cheapest_Overall_Projection: number, Cheapest_Overall_Saving: number,
+        Cheapest_Overall_Saving_Correct: string,
+
+        PresentmentCorrect: string, Incr_Decr_Check: string, Creative: string,
+        PassFailUnsure: string,
         Comments: string,
     }
     //Step:4 Declare an object to store and generate new csv with calculation
@@ -68,6 +68,9 @@ test('DualFuel test', async ({ page }) => {
     for (const property in dualFuelBucket) {
         //Step 5.1.1: Filtering price file according to zone of cutomer
         let customerZone = dualFuelBucket[property].Zone;
+        if (customerZone == undefined) {
+            customerZone = dualFuelBucket[property].Zone_1;
+        }
         let zoneBasedPriceData = newPriceData.filter(function (el) {
             return el[5] === customerZone;
         });
@@ -236,45 +239,50 @@ test('DualFuel test', async ({ page }) => {
 
                             //Single Gas object start here  
                             const gasProofingSheetObject: ProofingObject & { [key: string]: any } = {
-                                // Date: '', Checker: '', PDF: '',
-                                Account: dualFuelBucket[property].Gas_Customer_No,
-                                GSP: dualFuelBucket[property].Zone_1,
-                                Fuel: 'Gas',
+                                Date: '', Checker: '',
+                                Account_No: dualFuelBucket[property].Gas_Customer_No, Cust_Name_Correct: '',
+                                Beyond_Eligibility: dualFuelBucket[property].Beyond_eligibility,
+                                Marketing_Preference: dualFuelBucket[property].Marketing_pref, Marketing_Consent_Correct: '',
+                                //GSP: dualFuelBucket[property].Zone, 
+                                GSP: customerZone, Fuel: 'Gas',
                                 Tariff: dualFuelBucket[property].Gas_Tariff_Name,
-                                Meter: standardGasPrice[0]['3'],
-                                SimilarTariff: dualFuelBucket[property].Gas_Cheapest_Similar_Tariff,
-                                SimilarMeter: cheapestSimilarGasMeter,
-                                OverallTariff: dualFuelBucket[property].Gas_Cheapest_Overall_Tariff,
-                                OverallMeter: cheapestOverallGasMeter,
-                                // Marketing_pref: dualFuelBucket[property].Marketing_pref,
-                                // Beyond_Eligibility: dualFuelBucket[property].Beyond_Eligibility,
-                                // Creative: dualFuelBucket[property].CREATIVE,
-                                //  Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK,
-                                NewSC: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewStandingChargeCorrect: standardGasPrice[0]['13.0000'],
-                                // PassSc: gPass(),
-                                NewRate1: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewRate1Correct: standardGasPrice[0]['17.0000'],
-                                NewRate2: 'N/A', NewRate2Correct: 'N/A',
-                                NewRate3: 'N/A', NewRate3Correct: 'N/A',
-                                NewRate4: 'N/A', NewRate4Correct: 'N/A',
+                                Meter_Type: standardGasPrice[0]['3'],
+                                Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
+
+                                NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: standardGasPrice[0]['13.0000'],
+                                NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: standardGasPrice[0]['17.0000'],
+                               /* NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
+                                NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
+                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',*/
+                                New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
                                 NewAnnualCost: dualFuelBucket[property].Gas_Total_New_Cost,
-                                ChangeDifference: dualFuelBucket[property].Gas_Total_New_Cost - dualFuelBucket[property].Gas_Total_Old_Cost,
+                                ChangeDifference: Number(dualFuelBucket[property].Gas_Total_New_Cost - dualFuelBucket[property].Gas_Total_Old_Cost),
                                 ChangeAmountCorrect: '',
-                                PDFPersonalProjection: dualFuelBucket[property].Gas_Total_New_Cost,
-                                ManualCalculationProjection: totalGasCurrentCost(),
-                                Difference: (dualFuelBucket[property].Gas_Annual_Usage * standardGasPrice[0]['17.0000']) / (dualFuelBucket[property].Gas_Total_New_Cost),
 
-                                CheapSimilarProjection: totalGasSimilarCost(),
-                                CheapOverallProjection: totalGasOverallCost(),
-
+                                PIN_Personal_Projection: dualFuelBucket[property].Gas_Total_New_Cost,
+                                Calculated_Personal_Projection: totalGasCurrentCost(),
+                                //Difference: (dualFuelBucket[property].Gas_Annual_Usage * standardGasPrice[0]['17.0000']) / (dualFuelBucket[property].Gas_Total_New_Cost),
+                                Difference: totalGasCurrentCost() / (dualFuelBucket[property].Gas_Total_New_Cost),
                                 AreFrontPageCalculationCorrect: '',
-                                RelevantCheapestSaving: totalGasSimilarCost() - totalGasCurrentCost(),
-                                RelevantCheapestTariffCorrect: '',
-                                RelavantOverallSaving: totalGasOverallCost() - totalGasCurrentCost(),
-                                ActualCheapestOverallTariffCorrect: '',
+
+                                SimilarTariff: dualFuelBucket[property].Gas_Cheapest_Similar_Tariff,
+                                SimilarMeter: cheapestSimilarGasMeter,
+                                Cheapest_Similar_Projection: totalGasSimilarCost(),
+                                Cheapest_Similar_Saving: totalGasSimilarCost() - totalGasCurrentCost(),
+                                Cheapest_Similar_Saving_Correct: '',
+
+                                OverallTariff: dualFuelBucket[property].Gas_Cheapest_Overall_Tariff,
+                                OverallMeter: cheapestOverallGasMeter,
+                                Cheapest_Overall_Projection: totalGasOverallCost(),
+                                Cheapest_Overall_Saving: totalGasOverallCost() - totalGasCurrentCost(),
+                                Cheapest_Overall_Saving_Correct: '',
+
                                 PresentmentCorrect: '',
-                                PassFail: '',
+                                Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK, //This field not present in Email data file hence it will be blank
+                                Creative: dualFuelBucket[property].CREATIVE,//This field not present in Email data file hence it will be blank
+                                PassFailUnsure: '',
                                 Comments: '',
 
                             }

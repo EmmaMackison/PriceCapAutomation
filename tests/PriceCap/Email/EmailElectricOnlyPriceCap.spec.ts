@@ -11,7 +11,7 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Pay As You Go - Multi-Rate - Elec Only - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Simpler Energy(Multirate) - Elec Only - DD - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -25,27 +25,27 @@ test('DualFuel test', async ({ page }) => {
     })
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
-        // Date: string, Checker: string, PDF: string,
-        Account: number, GSP: string,
-        Fuel: string, Tariff: string, Meter: string,
-        SimilarTariff: string, SimilarMeter: string,
-        OverallTariff: string, OverallMeter: string,
-        //Marketing_pref: string, Beyond_Eligibility: string, Creative: string, Incr_Decr_Check: string,
-        NewSC: number, NewStandingChargeCorrect: string, //PassSc: string,
-        NewRate1: number, NewRate1Correct: string,
-        NewRate2: any, NewRate2Correct: string,
-        NewRate3: any, NewRate3Correct: string,
-        NewRate4: any, NewRate4Correct: string,
+        Date: string, Checker: string,
+        Account_No: number, Cust_Name_Correct: string,
+        Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
+        GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
+
+        NewSC_PIN: number, NewSC_PriceFile: any,
+        NewR1_PIN: number, NewR1_PriceFile: any,
+        NewR2_PIN: any, NewR2_PriceFile: any,
+        NewR3_PIN: any, NewR3_PriceFile: any,
+        NewR4_PIN: any, NewR4_PriceFile: any,
+        New_SC_Rates_Correct: string,
+
         OldAnnualCost: number, NewAnnualCost: number, ChangeDifference: number, ChangeAmountCorrect: String,
-        PDFPersonalProjection: number, ManualCalculationProjection: number, Difference: number,
-        CheapSimilarProjection: number, CheapOverallProjection: number,
-        AreFrontPageCalculationCorrect: string,
-        RelevantCheapestSaving: number,
-        RelavantOverallSaving: number,
-        RelevantCheapestTariffCorrect: string,
-        ActualCheapestOverallTariffCorrect: string,
-        PresentmentCorrect: string,
-        PassFail: string,
+        PIN_Personal_Projection: number, Calculated_Personal_Projection: number, Difference: number, AreFrontPageCalculationCorrect: string,
+        SimilarTariff: string, SimilarMeter: string, Cheapest_Similar_Projection: number, Cheapest_Similar_Saving: number,
+        Cheapest_Similar_Saving_Correct: string,
+        OverallTariff: string, OverallMeter: string, Cheapest_Overall_Projection: number, Cheapest_Overall_Saving: number,
+        Cheapest_Overall_Saving_Correct: string,
+
+        PresentmentCorrect: string, Incr_Decr_Check: string, Creative: string,
+        PassFailUnsure: string,
         Comments: string,
     }
     //Step:4 Declare an object to store and generate new csv with calculation
@@ -68,6 +68,9 @@ test('DualFuel test', async ({ page }) => {
     for (const property in dualFuelBucket) {
         //Step 5.1.1: Filtering price file according to zone of cutomer
         let customerZone = dualFuelBucket[property].Zone;
+        if (customerZone == undefined) {
+            customerZone = dualFuelBucket[property].Zone_1;
+        }
         let zoneBasedPriceData = newPriceData.filter(function (el) {
             return el[5] === customerZone;
         });
@@ -83,6 +86,9 @@ test('DualFuel test', async ({ page }) => {
             if (!eleTariffName.includes('Fixed')) {
                 let cheapestSimilarEleMeter = '';
                 let cheapestSimilarEle = dualFuelBucket[property].Cheapest_Similar_Tariff;
+                if (cheapestSimilarEle === undefined) {
+                    cheapestSimilarEle = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
+                }
                 let similarChecker: boolean = true;
                 let replaceCheapestSimilar = cheapestSimilarEle.replace(/[^a-zA-Z0-9]/g, '');
                 cheapestTariffs.forEach((element) => {
@@ -115,6 +121,9 @@ test('DualFuel test', async ({ page }) => {
                 //Capturing cheapest overall
                 let cheapestOverallEleMeter = '';
                 let cheapestOverallEle = dualFuelBucket[property].Cheapest_Overall_Tariff;
+                if (cheapestOverallEle === undefined) {
+                    cheapestOverallEle = dualFuelBucket[property].Elec_Cheapest_Overall_Tariff;
+                }
                 let overallChecker = true;
                 let replaceCheapestOverall = cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '');
 
@@ -177,8 +186,14 @@ test('DualFuel test', async ({ page }) => {
                     and overall,if cutomer is on demand than cheapest similar and overall would be direct debit, if customer current pay method is DD than cheapest
                     similar and overall will be DD*/
                     const elePaymentMethod = dualFuelBucket[property].Elec_Payment_Method;
-                    const cheapEleSimilarPayMethod = (dualFuelBucket[property].Cheapest_Similar_Tariff);
-                    const cheapEleOverallPayMethod = (dualFuelBucket[property].Cheapest_Overall_Tariff);
+                    let cheapEleSimilarPayMethod = (dualFuelBucket[property].Cheapest_Similar_Tariff);
+                    if (cheapEleSimilarPayMethod === undefined) {
+                        cheapEleSimilarPayMethod = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
+                    }
+                    let cheapEleOverallPayMethod = (dualFuelBucket[property].Cheapest_Overall_Tariff);
+                    if (cheapEleOverallPayMethod === undefined) {
+                        cheapEleOverallPayMethod = dualFuelBucket[property].Elec_Cheapest_Overall_Tariff;
+                    }
 
                     let cheapestSimilarPaymentMethod = '';
                     if (cheapEleSimilarPayMethod.includes('Pay As You Go')) {
@@ -532,50 +547,55 @@ test('DualFuel test', async ({ page }) => {
                             }
 
                             const eleProofingSheetObject: ProofingObject & { [key: string]: any } = {
-                                // Date: '', Checker: '', PDF: '',
-                                Account: dualFuelBucket[property].Elec_Customer_No,
-                                GSP: dualFuelBucket[property].Zone_1,
-                                Fuel: 'Electric',
+                                Date: '', Checker: '',
+                                Account_No: dualFuelBucket[property].Elec_Customer_No, Cust_Name_Correct: '',
+                                Beyond_Eligibility: dualFuelBucket[property].Beyond_eligibility,
+                                Marketing_Preference: dualFuelBucket[property].Marketing_pref, Marketing_Consent_Correct: '',
+                                //GSP: dualFuelBucket[property].Zone, 
+                                GSP: customerZone, Fuel: 'Electric',
                                 Tariff: dualFuelBucket[property].Elec_Tariff_Name,
-                                Meter: standardElectricPrice[0]['3'],
-                                SimilarTariff: dualFuelBucket[property].Cheapest_Similar_Tariff,
-                                // SimilarMeter: finalCheapestSimilarData[0]['3'],
-                                SimilarMeter: similarMeter,
-                                OverallTariff: dualFuelBucket[property].Cheapest_Overall_Tariff,
-                                //  OverallMeter: finalCheapestOverallData[0]['3'],
-                                OverallMeter: overallMeter,
-                                // Marketing_pref: dualFuelBucket[property].Marketing_pref,
-                                //Beyond_Eligibility: dualFuelBucket[property].Beyond_Eligibility,
-                                // Creative: dualFuelBucket[property].CREATIVE,
-                                // Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK,
+                                Meter_Type: standardElectricPrice[0]['3'],
+                                Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
 
-
-                                NewSC: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewStandingChargeCorrect: standardElectricPrice[0]['13.0000'],
-                                // PassSc: ePass(),
-                                NewRate1: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewRate1Correct: standardElectricPrice[0]['17.0000'],
-                                NewRate2: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewRate2Correct: standardElectricPrice[0]['20.0000'],
-                                NewRate3: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewRate3Correct: standardElectricPrice[0]['23.0000'],
-                                NewRate4: dualFuelBucket[property].Elec_New_Unit_4_Inc_VAT, NewRate4Correct: standardElectricPrice[0]['26.0000'],
+                                NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: standardElectricPrice[0]['13.0000'],
+                                NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: standardElectricPrice[0]['17.0000'],
+                                NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: standardElectricPrice[0]['20.0000'],
+                                NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewR3_PriceFile: standardElectricPrice[0]['23.0000'],
+                                NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_VAT, NewR4_PriceFile: standardElectricPrice[0]['26.0000'],
+                                New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
                                 NewAnnualCost: dualFuelBucket[property].Elec_Total_New_Cost,
                                 ChangeDifference: Number(dualFuelBucket[property].Elec_Total_New_Cost - dualFuelBucket[property].Elec_Total_Old_Cost),
                                 ChangeAmountCorrect: '',
-                                PDFPersonalProjection: dualFuelBucket[property].Elec_Total_New_Cost,
-                                ManualCalculationProjection: returnValue,
+
+                                PIN_Personal_Projection: dualFuelBucket[property].Elec_Total_New_Cost,
+                                Calculated_Personal_Projection: returnValue,
                                 Difference: (dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000'] / dualFuelBucket[property].Elec_Total_New_Cost),
-
-                                CheapSimilarProjection: similarReturnTotalCost,
-                                CheapOverallProjection: returnOverallValue,
-
                                 AreFrontPageCalculationCorrect: '',
-                                RelevantCheapestSaving: returnValue - similarReturnTotalCost,
-                                RelevantCheapestTariffCorrect: '',
-                                RelavantOverallSaving: returnValue - returnOverallValue,
-                                ActualCheapestOverallTariffCorrect: '',
+
+                                //SimilarTariff: dualFuelBucket[property].Cheapest_Similar_Tariff,
+                                SimilarTariff: cheapEleSimilarPayMethod,
+                                // SimilarMeter: finalCheapestSimilarData[0]['3'],
+                                SimilarMeter: similarMeter,
+                                Cheapest_Similar_Projection: similarReturnTotalCost,
+                                Cheapest_Similar_Saving: returnValue - similarReturnTotalCost,
+                                Cheapest_Similar_Saving_Correct: '',
+
+                                // OverallTariff: dualFuelBucket[property].Cheapest_Overall_Tariff,
+                                OverallTariff: cheapEleOverallPayMethod,
+                                //  OverallMeter: finalCheapestOverallData[0]['3'],
+                                OverallMeter: overallMeter,
+                                Cheapest_Overall_Projection: returnOverallValue,
+                                Cheapest_Overall_Saving: returnValue - returnOverallValue,
+                                Cheapest_Overall_Saving_Correct: '',
+
                                 PresentmentCorrect: '',
-                                PassFail: '',
+                                Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK,
+                                Creative: dualFuelBucket[property].CREATIVE,
+                                PassFailUnsure: '',
                                 Comments: '',
+
 
                             }
                             newDualFuelBucketData.push(eleProofingSheetObject);
