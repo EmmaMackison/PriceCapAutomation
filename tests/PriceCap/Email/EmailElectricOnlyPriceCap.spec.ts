@@ -11,7 +11,7 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Simpler Energy(Multirate) - Elec Only - DD - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Copy of pin_sample_inc_usage_splits - pin_sample_inc_usage_splits.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -696,11 +696,11 @@ test('DualFuel test', async ({ page }) => {
             if (err) {
                 console.log(18, err);
             }
-            console.log('CSV file created');
+            console.log('Proofing_Sheet Generated Successfully');
         })
     }
     else {
-        console.log('No CSV File generated for this Bucket due to all accounts missing required info i.e. zone,tariff,Paymentmthod..etc');
+        console.log('No Proofing_Sheet generated for this Bucket due to all accounts missing required info i.e. zone,tariff,Paymentmthod..etc');
     }
 });
 
