@@ -700,7 +700,9 @@ test('DualFuel test', async ({ page }) => {
         })
     }
     else {
+
         console.log('No Proofing_Sheet Generated for this Bucket due to all accounts missing required info i.e. zone,tariff,Paymentmthod..etc');
+
     }
 });
 
