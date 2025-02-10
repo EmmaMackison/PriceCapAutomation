@@ -377,11 +377,11 @@ test('DualFuel test', async ({ page }) => {
             if (err) {
                 console.log(18, err);
             }
-            console.log('CSV file created');
+            console.log('Proofing_Sheet Generated Successfully');
         })
     }
     else {
-        console.log('No CSV File generated for this Bucket due to all accounts missing required info i.e. zone,tariff,Paymentmthod..etc');
+        console.log('No Proofing_Sheet Generated for this Bucket due to all accounts missing required info i.e. zone,tariff,Paymentmthod..etc');
     }
 });
 
