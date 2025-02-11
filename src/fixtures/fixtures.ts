@@ -6,7 +6,7 @@ type pageObjects = {
      
 }
 export const test = base.extend<pageObjects>({
-    playwrightSiteActions: async({page}, use) => {
+   playwrightSiteActions: async({page}, use) => {
         await use(new PlaywrightSiteActions(page))
     }
 });
