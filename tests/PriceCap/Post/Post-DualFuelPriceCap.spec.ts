@@ -11,7 +11,7 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Copy of pin_sample_inc_usage_splits - pin_sample_inc_usage_splits.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Multi - Dual Fuel - ODP - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -609,8 +609,8 @@ test('DualFuel test', async ({ page }) => {
                                 NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: standardElectricPrice[0]['13.0000'],
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: standardElectricPrice[0]['17.0000'],
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: standardElectricPrice[0]['20.0000'],
-                                NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_VAT, NewR3_PriceFile: standardElectricPrice[0]['23.0000'],
-                                NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_VAT, NewR4_PriceFile: standardElectricPrice[0]['26.0000'],
+                                NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat, NewR3_PriceFile: standardElectricPrice[0]['23.0000'],
+                                NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat, NewR4_PriceFile: standardElectricPrice[0]['26.0000'],
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
@@ -958,7 +958,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/trial.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/ODPMultiDFPOST.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
