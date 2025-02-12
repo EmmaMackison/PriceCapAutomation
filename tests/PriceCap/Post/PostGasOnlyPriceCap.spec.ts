@@ -11,7 +11,7 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Simpler Energy - Gas Only - On Demand - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Gas Only - On Demand - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
