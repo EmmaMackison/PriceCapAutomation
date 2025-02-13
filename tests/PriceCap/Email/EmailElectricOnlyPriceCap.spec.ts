@@ -18,7 +18,7 @@ test('DualFuel test', async ({ page }) => {
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/January Live Run Calculator - Rohit - Tariff Info & Rates.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator - April 2025 - Rohit.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
@@ -191,13 +191,13 @@ test('DualFuel test', async ({ page }) => {
                     similar and overall will be DD*/
                     //Getting Cheapest Similar Payment method
 
-                    let cheapEleSimilarTarrif = (dualFuelBucket[property].Cheapest_Similar_Tariff);
-                    if (cheapEleSimilarTarrif === undefined) {
-                        cheapEleSimilarTarrif = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
+                    let cheapEleSimilarTariff = (dualFuelBucket[property].Cheapest_Similar_Tariff);
+                    if (cheapEleSimilarTariff === undefined) {
+                        cheapEleSimilarTariff = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
                     }
 
                     let cheapestSimilarPaymentMethod = '';
-                    if (cheapEleSimilarTarrif.includes('Pay As You Go')) {
+                    if (cheapEleSimilarTariff.includes('Pay As You Go')) {
                         cheapestSimilarPaymentMethod = 'Prepayment';
                     }
                     else { cheapestSimilarPaymentMethod = 'Direct Debit'; }
@@ -224,8 +224,8 @@ test('DualFuel test', async ({ page }) => {
                     let finalCheapestOverallData = cheapestEleOverallPriceData.filter(function (el) {
                         return el[10] === cheapestOverallPaymentMethod;
                     });
-                    //getting prices for current tarrif
-                    const elePaymentMethod = dualFuelBucket[property].Elec_Payment_Method;//Storing current ele payment method from data file
+                    //getting prices for current tarriff
+                    const elePaymentMethod = dualFuelBucket[property].Elec_Payment_Method; //Storing current ele payment method from data file
                     const checkWarmerTariff = dualFuelBucket[property].Elec_Tariff_Name; //Storing current ele tariff  
                     let elePayMethod = '';
                     if (checkWarmerTariff.includes('Warmer Home Plan')) {
@@ -591,10 +591,11 @@ test('DualFuel test', async ({ page }) => {
                                 else { return 0; }
                             }
                             //Making sure overall cost correct or not
-                            let elecheapestOverallSaving = dualFuelBucket[property].Elec_Cheapest_Overall_saving;
+                            let elecheapestOverallSaving:number = Number(dualFuelBucket[property].Elec_Cheapest_Overall_saving);
                             function isEleOverallSavingCorrect() {
-                                let UL: number = (elecheapestOverallSaving + elecheapestOverallSaving * 0.05);
-                                let LL: number = (elecheapestOverallSaving - elecheapestOverallSaving * 0.05);
+                                let LL:number =(elecheapestOverallSaving - elecheapestOverallSaving * 0.05);
+                                let UL:number =(elecheapestOverallSaving + elecheapestOverallSaving * 0.05);
+                               
                                 let overallSaving: number = returnValue - returnOverallValue;
                                 if (overallSaving === 0) { return 'No Overall Saving' }
                                 else {
@@ -634,7 +635,7 @@ test('DualFuel test', async ({ page }) => {
                                 Difference: ((returnValue / dualFuelBucket[property].Elec_Total_New_Cost) * 100).toFixed(2) + '%',
 
                                 //SimilarTariff: dualFuelBucket[property].Cheapest_Similar_Tariff,
-                                SimilarTariff: cheapEleSimilarTarrif,
+                                SimilarTariff: cheapEleSimilarTariff,
                                 SimilarMeter: similarMeter,
                                 // SimilarMeter: finalCheapestSimilarData[0]['3'],
                                 Calculated_Similar_Projection: similarReturnTotalCost,

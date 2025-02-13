@@ -18,7 +18,7 @@ test('DualFuel test', async ({ page }) => {
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/January Live Run Calculator - Rohit - Tariff Info & Rates.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator - April 2025 - Rohit.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
@@ -251,7 +251,7 @@ test('DualFuel test', async ({ page }) => {
                             //Calculating gas similar saving
                             function calculateGasSimilarSaving() {
                                 if (totalGasCurrentCost() !== 0 && totalGasSimilarCost() !== 0) {
-                                    return totalGasSimilarCost() - totalGasCurrentCost();
+                                    return totalGasCurrentCost() -totalGasSimilarCost();
                                 }
                                 else { return 0; }
                             }
@@ -271,16 +271,16 @@ test('DualFuel test', async ({ page }) => {
                             //Calculating gas overall saving
                             function calculateGasOverallSaving() {
                                 if (totalGasCurrentCost() !== 0 && totalGasOverallCost() !== 0) {
-                                    return totalGasOverallCost() - totalGasCurrentCost();
+                                    return  totalGasCurrentCost() - totalGasOverallCost();
                                 }
                                 else { return 0; }
                             }
                             //Making sure is gas overall saving is correct or not
-                            let gasCheapestOverallSaving: number = Number(dualFuelBucket[property].Gas_Overall_saving);
+                            let gasCheapestOverallSaving:number = Number(dualFuelBucket[property].Gas_Overall_Saving);
                             function isGasOverallSavingCorrect() {
                                 let UL: number = (gasCheapestOverallSaving + gasCheapestOverallSaving * 0.05);
                                 let LL: number = (gasCheapestOverallSaving - gasCheapestOverallSaving * 0.05);
-                                let overallSaving: number = totalGasCurrentCost() - totalGasOverallCost();
+                                let overallSaving:number = totalGasCurrentCost() - totalGasOverallCost();
                                 if (overallSaving === 0) { return 'No Overall Saving' }
                                 else {
                                     return overallSaving >= LL && overallSaving <= UL ? 'Yes' : 'No';

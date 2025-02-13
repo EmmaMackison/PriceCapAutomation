@@ -11,14 +11,14 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Pay As You Go - Multi-Rate - Elec Only - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Multi - Dual Fuel - ODP - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/January Live Run Calculator - Rohit - Tariff Info & Rates.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator - April 2025 - Rohit.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
@@ -594,7 +594,7 @@ test('DualFuel test', async ({ page }) => {
                                 else { return 0; }
                             }
                             //Making sure overall cost correct or not
-                            let elecheapestOverallSaving = dualFuelBucket[property].Elec_Cheapest_Overall_saving;
+                            let elecheapestOverallSaving:number = Number(dualFuelBucket[property].Elec_Cheapest_Overall_saving);
                             function isEleOverallSavingCorrect() {
                                 let UL: number = (elecheapestOverallSaving + elecheapestOverallSaving * 0.05);
                                 let LL: number = (elecheapestOverallSaving - elecheapestOverallSaving * 0.05);
@@ -692,7 +692,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/trial.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/ODP Multi DF POST.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
