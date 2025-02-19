@@ -22,7 +22,7 @@ test('DualFuel test', async ({ page }) => {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
-    })
+    });
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
         Date: string, Checker: string, Page: string,
@@ -30,8 +30,8 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
 
-        NewSC_PIN: number, NewSC_PriceFile: any,
-        NewR1_PIN: number, NewR1_PriceFile: any,
+        NewSC_PIN: any, NewSC_PriceFile: any,
+        NewR1_PIN: any, NewR1_PriceFile: any,
         /*NewR2_PIN: any, NewR2_PriceFile: any,
         NewR3_PIN: any, NewR3_PriceFile: any,
         NewR4_PIN: any, NewR4_PriceFile: any,*/
@@ -181,7 +181,6 @@ test('DualFuel test', async ({ page }) => {
                     let cheapestSimilarGasPaymentMethod = '';
                     const cheapGasSimilarPayMethod = (dualFuelBucket[property].Gas_Cheapest_Similar_Tariff);
                     const cheapGasOverallPayMethod = (dualFuelBucket[property].Gas_Cheapest_Overall_Tariff);
-
                     let cheapestSimilarPaymentMethod = '';
                     if (cheapGasSimilarPayMethod.includes('Pay As You Go')) {
                         cheapestSimilarGasPaymentMethod = 'Prepayment';
@@ -299,11 +298,13 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
-                                NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
-                                NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),
-                                /*NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
-                                  NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
-                                  NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',*/
+                                /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
+                                NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
+                                NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
+                                NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,
+                                NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
+                                NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
+                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,

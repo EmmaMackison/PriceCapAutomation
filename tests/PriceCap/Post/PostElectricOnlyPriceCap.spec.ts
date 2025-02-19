@@ -11,7 +11,7 @@ test('DualFuel test', async ({ page }) => {
     //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Multi - Dual Fuel - ODP - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Warmer Home Plan - Multi - Elec Only - ODP - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -22,7 +22,7 @@ test('DualFuel test', async ({ page }) => {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
-    })
+    });
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
         Date: string, Checker: string, Page: string,
@@ -30,8 +30,8 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
 
-        NewSC_PIN: number, NewSC_PriceFile: any,
-        NewR1_PIN: number, NewR1_PriceFile: any,
+        NewSC_PIN: any, NewSC_PriceFile: any,
+        NewR1_PIN: any, NewR1_PriceFile: any,
         NewR2_PIN: any, NewR2_PriceFile: any,
         NewR3_PIN: any, NewR3_PriceFile: any,
         NewR4_PIN: any, NewR4_PriceFile: any,
@@ -82,9 +82,7 @@ test('DualFuel test', async ({ page }) => {
                 beyondEligibility = dualFuelBucket[property].Beyond_eligibility;
             }
 
-
-            //Declaring current Electric Meter variable and getting current electric tariff name from data bucket
-            //Capturing current Electric Meter type
+            //Declaring current Electric Meter variable and getting current electric tariff name from data bucket           
             let eMeter: string = '';
             let eleTariffName: string = dualFuelBucket[property].Elec_Tariff_Name;
             if (!eleTariffName.includes('Fixed')) { //Removing account from calculation if customers currnt price is fixed
@@ -137,7 +135,7 @@ test('DualFuel test', async ({ page }) => {
                         cheapestOverallEle = element; overallChecker = false;
                     }
                     /* ***NOTE**** Below If condition will make sure if cutomers cheapest overall is 1 year fixed loyalt-domestic economy then it will be calculated
-                   according to 1 year fixed loyalty economy 7*/
+                    according to 1 year fixed loyalty economy 7*/
                     if (cheapestOverallEle === "1 Year Fixed Loyalty - Domestic Economy") { cheapestOverallEle = "1 Year Fixed Loyalty Economy 7"; }
                 });
                 if (overallChecker) {
@@ -226,7 +224,6 @@ test('DualFuel test', async ({ page }) => {
                     //getting prices for current tarriff
                     const elePaymentMethod = dualFuelBucket[property].Elec_Payment_Method; //Storing current ele payment method from data file
                     const checkWarmerTariff = dualFuelBucket[property].Elec_Tariff_Name; //Storing current ele tariff  
-
                     let elePayMethod = '';
                     if (checkWarmerTariff.includes('Warmer Home Plan')) {
                         elePayMethod = 'Direct Debit';
@@ -239,7 +236,6 @@ test('DualFuel test', async ({ page }) => {
                             }
                         }
                     }
-
                     let eleFinalPriceData = eleMeterBasedPriceData.filter(function (el) {
                         return el[10] === elePayMethod;
                     });
@@ -257,7 +253,6 @@ test('DualFuel test', async ({ page }) => {
                                     return 'Fail';
                                 }
                             }*/
-
                             let stMeter = standardElectricPrice[0][3];//this would be actual eMeter for this customer                         
                             let switchMeterDecider = '';
                             let meterChecker = true;
@@ -595,7 +590,6 @@ test('DualFuel test', async ({ page }) => {
                                 }
                             }
                             //Assignment of proofing Sheet object
-
                             const eleProofingSheetObject: ProofingObject & { [key: string]: any } = {
                                 Date: '', Checker: '', Page: '',
                                 Account_No: dualFuelBucket[property].Elec_Customer_No, Cust_Name_Correct: '', Cust_Address_Correct: '',
@@ -607,11 +601,16 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardElectricPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
-                                NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
+                                /* NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
                                 NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat, NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
-                                NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat, NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),
+                                NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat, NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),*/
+                                NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
+                                NewR1_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardElectricPrice[0]['17.0000'] * 10000) / 10000,
+                                NewR2_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat * 10000) / 10000, NewR2_PriceFile: Math.round(standardElectricPrice[0]['20.0000'] * 10000) / 10000,
+                                NewR3_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat * 10000) / 10000, NewR3_PriceFile: Math.round(standardElectricPrice[0]['23.0000'] * 10000) / 10000,
+                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
@@ -680,7 +679,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/ODP Multi DF POST.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/WHP Multi Elec Only ODP EMAIL.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
