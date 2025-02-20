@@ -29,6 +29,8 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
+        //Below fields are ment for Live Run to check correct price on KAE 
+        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -82,7 +84,7 @@ test('DualFuel test', async ({ page }) => {
                 beyondEligibility = dualFuelBucket[property].Beyond_eligibility;
             }
 
-            //Declaring current Electric Meter variable and getting current electric tariff name from data bucket           
+            //Declaring current Electric Meter variable and getting current electric tariff name from data bucket
             let eMeter: string = '';
             let eleTariffName: string = dualFuelBucket[property].Elec_Tariff_Name;
             if (!eleTariffName.includes('Fixed')) { //Removing account from calculation if customers currnt price is fixed
@@ -598,7 +600,17 @@ test('DualFuel test', async ({ page }) => {
                                 Tariff: dualFuelBucket[property].Elec_Tariff_Name,
                                 Meter_Type: standardElectricPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
-                                // Payment_Method:elePayMethod,
+                                // Payment_Method:elePayMethod,  
+                                //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
+                                /* NewSC_KAE:Math.round(standardElectricPrice[0]['12'] * 10000)/10000,
+                                 NewR1_KAE:Math.round(standardElectricPrice[0]['16'] * 10000)/10000,
+                                 NewR2_KAE:Math.round(standardElectricPrice[0]['19'] * 10000)/10000,
+                                 NewR3_KAE:Math.round(standardElectricPrice[0]['22'] * 10000)/10000,
+                                 NewR4_KAE:Math.round(standardElectricPrice[0]['25'] * 10000)/10000,
+                                 New_KAE_SC_Rates_Correct:'',*/
+
+
+
                                 /* NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
@@ -880,6 +892,14 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
+                                //Below 5 values only for Live Run to check correct price (Excluding VAT) in KAE  
+                                /*NewSC_KAE:Math.round(standardGasPrice[0]['12'] * 10000)/10000,
+                                NewR1_KAE:Math.round(standardGasPrice[0]['16'] * 10000)/10000,
+                                NewR2_KAE:'N/A',
+                                NewR3_KAE:'N/A',
+                                NewR4_KAE:'N/A',
+                                New_KAE_SC_Rates_Correct:'',*/
+
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
                                 NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
@@ -952,7 +972,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/trial.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/lIVE Trial.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }

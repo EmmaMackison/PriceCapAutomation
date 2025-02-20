@@ -29,6 +29,8 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
+        //Below fields are ment for Live Run to check correct price on KAE 
+        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -601,6 +603,13 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardElectricPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
+                                //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
+                                /* NewSC_KAE:Math.round(standardElectricPrice[0]['12'] * 10000)/10000,
+                                 NewR1_KAE:Math.round(standardElectricPrice[0]['16'] * 10000)/10000,
+                                 NewR2_KAE:Math.round(standardElectricPrice[0]['19'] * 10000)/10000,
+                                 NewR3_KAE:Math.round(standardElectricPrice[0]['22'] * 10000)/10000,
+                                 NewR4_KAE:Math.round(standardElectricPrice[0]['25'] * 10000)/10000,
+                                 New_KAE_SC_Rates_Correct:'',*/
                                 /*NewSC_PIN: Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4), NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat).toFixed(4), NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat).toFixed(4), NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
@@ -886,6 +895,13 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
+                                //Below 5 values only for Live Run to check correct price (Excluding VAT) in KAE  
+                                /*NewSC_KAE:Math.round(standardGasPrice[0]['12'] * 10000)/10000,
+                                NewR1_KAE:Math.round(standardGasPrice[0]['16'] * 10000)/10000,
+                                NewR2_KAE:'N/A',
+                                NewR3_KAE:'N/A',
+                                NewR4_KAE:'N/A',
+                                New_KAE_SC_Rates_Correct:'',*/
                                 /*NewSC_PIN: Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat).toFixed(4), NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: Number(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat).toFixed(4), NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
                                 NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,

@@ -29,6 +29,8 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
+        //Below fields are ment for Live Run to check correct price on KAE 
+        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -297,14 +299,20 @@ test('DualFuel test', async ({ page }) => {
                                 Tariff: dualFuelBucket[property].Gas_Tariff_Name,
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
+                                //Below 5 values only for Live Run to check correct price (Excluding VAT) in KAE  
+                                /*NewSC_KAE:Math.round(standardGasPrice[0]['12'] * 10000)/10000,
+                                NewR1_KAE:Math.round(standardGasPrice[0]['16'] * 10000)/10000,
+                                NewR2_KAE:'N/A',
+                                New_KAE_SC_Rates_Correct:'',*/
+
 
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
                                 NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
                                 NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,
                                 NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
-                                NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
-                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',
+                                /*NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
+                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',*/
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
