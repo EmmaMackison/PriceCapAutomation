@@ -58,10 +58,10 @@ test('DualFuel test', async ({ page }) => {
         '1 Year Fixed + Greener Electricity Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
         '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7'];
     const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate (Heating)', '2 Rate',
-        'THTC', 'Flex Rate','Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
+        'THTC', 'Flex Rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',];
     const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity'];
-    const twoRateMeters = [ 'Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)','2 Rate',
+    const twoRateMeters = ['Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)', '2 Rate',
         'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7'];
     const threeRateMeters = ['3 rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)', 'Economy & Heating Load', 'Heatwise 3 Rate', 'Region Specific'];
     const fourRateMeters = '4 rate';
@@ -105,19 +105,11 @@ test('DualFuel test', async ({ page }) => {
                 if (similarChecker) {
                     if ((cheapestSimilarEle === 'Simpler Energy' || cheapestSimilarEle === 'Warmer Home Plan' || cheapestSimilarEle === 'Pay As You Go')) { cheapestSimilarEle = 'Standard'; }
                     else {
-                        cheapestSimilarEle=cheapestSimilarEle.substring(cheapestSimilarEle.lastIndexOf('-')+2);
-                       multiRateElectircMeters.forEach((element) => {
+                        cheapestSimilarEle = cheapestSimilarEle.substring(cheapestSimilarEle.lastIndexOf('-') + 2);
+                        multiRateElectircMeters.forEach((element) => {
                             //if (cheapestSimilarEle.includes(element)) { cheapestSimilarEle = element; }
-                            if (cheapestSimilarEle === element) {  cheapestSimilarEle = element;}
-                           
+                            if (cheapestSimilarEle === element) { cheapestSimilarEle = element; }
                         });
-                        /*for(let i = 0;i<multiRateElectircMeters.length;i++){
-                            if (cheapestSimilarEle.includes(multiRateElectircMeters[0])) {
-                                cheapestSimilarEle = multiRateElectircMeters[0];
-                                
-                            }
-                        }*/
-                        
                     }
                 }
                 for (const prop in zoneBasedPriceData) {
@@ -153,21 +145,11 @@ test('DualFuel test', async ({ page }) => {
                 if (overallChecker) {
                     if (cheapestOverallEle === 'Simpler Energy' || cheapestOverallEle === 'Warmer Home Plan' || cheapestOverallEle === 'Pay As You Go') { cheapestOverallEle = 'Standard'; }
                     else {
-                        cheapestOverallEle=cheapestOverallEle.substring(cheapestOverallEle.lastIndexOf('-')+2);
+                        cheapestOverallEle = cheapestOverallEle.substring(cheapestOverallEle.lastIndexOf('-') + 2);
                         multiRateElectircMeters.forEach((element) => {
-                            /*if (cheapestOverallEle.includes(element)) {
-                                cheapestOverallEle = element;
-                            }*/
-                                if (cheapestOverallEle === element) {
-                                    cheapestOverallEle = element;
-                                }
+                            //if (cheapestOverallEle.includes(element)) {cheapestOverallEle = element;}
+                            if (cheapestOverallEle === element) { cheapestOverallEle = element; }
                         });
-                        
-                        /*for(let i = 0;i<multiRateElectircMeters.length;i++){
-                            if (cheapestOverallEle.includes(multiRateElectircMeters[0])) {
-                                cheapestOverallEle = multiRateElectircMeters[0];
-                            }
-                        }*/
                     }
                 }
                 for (const prop in zoneBasedPriceData) {
@@ -184,33 +166,20 @@ test('DualFuel test', async ({ page }) => {
                 }
                 //Capturing Ceapest overall complete here
                 //Capturing Current electric meter and current price data based on this meter
-             
                 if (eleTariffName === 'Simpler Energy' || eleTariffName === 'Warmer Home Plan' || eleTariffName === 'Pay As You Go') { eleTariffName = 'Standard'; }
                 else {
-                     eleTariffName=eleTariffName.substring(eleTariffName.lastIndexOf('-')+2);
-                   
+                    eleTariffName = eleTariffName.substring(eleTariffName.lastIndexOf('-') + 2);
                     multiRateElectircMeters.forEach((element) => {
-                       /* if (eleTariffName.includes(element)) {
-                            eleTariffName = element;
-                        }*/
-                        if (eleTariffName === element) {
-                            eleTariffName = element;
-                        }
+                        // if (eleTariffName.includes(element)) {eleTariffName = element;}
+                        if (eleTariffName === element) { eleTariffName = element; }
                     });
-                    /*for(let i = 0;i<multiRateElectircMeters.length;i++){
-                        if (eleTariffName.includes(multiRateElectircMeters[0])) {
-                            eleTariffName = multiRateElectircMeters[0];
-                        }
-                    }*/
-
                 }
-                
                 for (const prop in zoneBasedPriceData) {
                     if (eleTariffName === zoneBasedPriceData[prop][3]) {
                         eMeter = eleTariffName;
                     }
                 }
-               
+
                 let eleMeterBasedPriceData = [];
                 if (eMeter !== '') {
                     eleMeterBasedPriceData = zoneBasedPriceData.filter(function (el) {
@@ -331,7 +300,6 @@ test('DualFuel test', async ({ page }) => {
                                         let offPeakCost = offPeakUsage * standardElectricPrice[0]['20.0000'];
                                         let heatingCost = heatingUsage * standardElectricPrice[0]['20.0000'];
                                         returnValue = Number((anytimeCost + peakTimeCost + offPeakCost + heatingCost + standingCharge).toFixed(2));
-
                                     }
                                     totalTwoRateCurrentCost();
                                     break;
@@ -580,7 +548,6 @@ test('DualFuel test', async ({ page }) => {
                                         }
                                         totalCheapestOverallFourRateCost();
                                         break;
-
                                     default:
 
                                 }
