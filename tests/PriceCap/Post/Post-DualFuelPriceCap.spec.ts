@@ -29,6 +29,8 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
+        //Below fields are ment for Live Run to check correct price on KAE 
+        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -55,11 +57,11 @@ test('DualFuel test', async ({ page }) => {
         '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity',
         '1 Year Fixed + Greener Electricity Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
         '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7'];
-    const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate',
-        'THTC', 'Flex Rate', '2 Rate (Heating)', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
+    const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate (Heating)', '2 Rate',
+        'THTC', 'Flex Rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',];
     const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity'];
-    const twoRateMeters = ['2 Rate', 'Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)',
+    const twoRateMeters = ['Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)', '2 Rate',
         'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7'];
     const threeRateMeters = ['3 rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)', 'Economy & Heating Load', 'Heatwise 3 Rate', 'Region Specific'];
     const fourRateMeters = '4 rate';
@@ -82,7 +84,7 @@ test('DualFuel test', async ({ page }) => {
                 beyondEligibility = dualFuelBucket[property].Beyond_eligibility;
             }
 
-            //Declaring current Electric Meter variable and getting current electric tariff name from data bucket           
+            //Declaring current Electric Meter variable and getting current electric tariff name from data bucket
             let eMeter: string = '';
             let eleTariffName: string = dualFuelBucket[property].Elec_Tariff_Name;
             if (!eleTariffName.includes('Fixed')) { //Removing account from calculation if customers currnt price is fixed
@@ -103,8 +105,10 @@ test('DualFuel test', async ({ page }) => {
                 if (similarChecker) {
                     if ((cheapestSimilarEle === 'Simpler Energy' || cheapestSimilarEle === 'Warmer Home Plan' || cheapestSimilarEle === 'Pay As You Go')) { cheapestSimilarEle = 'Standard'; }
                     else {
+                        cheapestSimilarEle = cheapestSimilarEle.substring(cheapestSimilarEle.lastIndexOf('-') + 2);
                         multiRateElectircMeters.forEach((element) => {
-                            if (cheapestSimilarEle.includes(element)) { cheapestSimilarEle = element; }
+                            //if (cheapestSimilarEle.includes(element)) { cheapestSimilarEle = element; }
+                            if (cheapestSimilarEle === element) { cheapestSimilarEle = element; }
                         });
                     }
                 }
@@ -141,10 +145,10 @@ test('DualFuel test', async ({ page }) => {
                 if (overallChecker) {
                     if (cheapestOverallEle === 'Simpler Energy' || cheapestOverallEle === 'Warmer Home Plan' || cheapestOverallEle === 'Pay As You Go') { cheapestOverallEle = 'Standard'; }
                     else {
+                        cheapestOverallEle = cheapestOverallEle.substring(cheapestOverallEle.lastIndexOf('-') + 2);
                         multiRateElectircMeters.forEach((element) => {
-                            if (cheapestOverallEle.includes(element)) {
-                                cheapestOverallEle = element;
-                            }
+                            //if (cheapestOverallEle.includes(element)) {cheapestOverallEle = element;}
+                            if (cheapestOverallEle === element) { cheapestOverallEle = element; }
                         });
                     }
                 }
@@ -164,10 +168,10 @@ test('DualFuel test', async ({ page }) => {
                 //Capturing Current electric meter and current price data based on this meter
                 if (eleTariffName === 'Simpler Energy' || eleTariffName === 'Warmer Home Plan' || eleTariffName === 'Pay As You Go') { eleTariffName = 'Standard'; }
                 else {
+                    eleTariffName = eleTariffName.substring(eleTariffName.lastIndexOf('-') + 2);
                     multiRateElectircMeters.forEach((element) => {
-                        if (eleTariffName.includes(element)) {
-                            eleTariffName = element;
-                        }
+                        // if (eleTariffName.includes(element)) {eleTariffName = element;}
+                        if (eleTariffName === element) { eleTariffName = element; }
                     });
                 }
                 for (const prop in zoneBasedPriceData) {
@@ -245,14 +249,6 @@ test('DualFuel test', async ({ page }) => {
                         const standardElectricPrice = eleFinalPriceData.filter(newPrice => newPrice[4] === 'Electric');
 
                         if (standardElectricPrice.length) {
-                            /*const ePass = () => {
-                                if (Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4) === Number(standardElectricPrice[0]['13.0000']).toFixed(4)) {
-                                    return 'Pass';
-                                }
-                                else {
-                                    return 'Fail';
-                                }
-                            }*/
                             let stMeter = standardElectricPrice[0][3];//this would be actual eMeter for this customer                         
                             let switchMeterDecider = '';
                             let meterChecker = true;
@@ -599,6 +595,16 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardElectricPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
+                                //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
+                                /* NewSC_KAE:Math.round(standardElectricPrice[0]['12'] * 10000)/10000,
+                                 NewR1_KAE:Math.round(standardElectricPrice[0]['16'] * 10000)/10000,
+                                 NewR2_KAE:Math.round(standardElectricPrice[0]['19'] * 10000)/10000,
+                                 NewR3_KAE:Math.round(standardElectricPrice[0]['22'] * 10000)/10000,
+                                 NewR4_KAE:Math.round(standardElectricPrice[0]['25'] * 10000)/10000,
+                                 New_KAE_SC_Rates_Correct:'',*/
+
+
+
                                 /* NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
@@ -680,7 +686,7 @@ test('DualFuel test', async ({ page }) => {
                 if ((cheapestSimilarGas === 'Simpler Energy' || cheapestSimilarGas === 'Warmer Home Plan' || cheapestSimilarGas === 'Pay As You Go')) {
                     cheapestSimilarGas = 'Standard';
                 }
-                else {
+                else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestSimilarGas.includes(element)) {
                             cheapestSimilarGas = element;
@@ -715,7 +721,7 @@ test('DualFuel test', async ({ page }) => {
             });
             if (overallGChecker) {
                 if (cheapestOverallGas === 'Simpler Energy' || cheapestOverallGas === 'Warmer Home Plan' || cheapestOverallGas === 'Pay As You Go') { cheapestOverallGas = 'Standard'; }
-                else {
+                else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestOverallGas.includes(element)) {
                             cheapestOverallGas = element;
@@ -723,22 +729,18 @@ test('DualFuel test', async ({ page }) => {
                     });
                 }
             }
-
             for (const prop in zoneBasedPriceData) {
                 if (cheapestOverallGas === zoneBasedPriceData[prop][3]) {
                     cheapestOverallGasMeter = cheapestOverallGas;
-
                 }
                 //else{cheapestOverallGas = '';}
             }
-
             let cheapestGasOverallPriceData = [];
             if (cheapestOverallGasMeter !== '') {
                 cheapestGasOverallPriceData = zoneBasedPriceData.filter(function (el) {
                     return (el[3] === cheapestOverallGasMeter && el[4] === 'Gas');
                 });
             }
-
             //Capturing current Gas Meter Type
             let gMeter: string = '';
             let gasTariffName: string = dualFuelBucket[property].Gas_Tariff_Name;
@@ -880,6 +882,14 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
+                                //Below 5 values only for Live Run to check correct price (Excluding VAT) in KAE  
+                                /*NewSC_KAE:Math.round(standardGasPrice[0]['12'] * 10000)/10000,
+                                NewR1_KAE:Math.round(standardGasPrice[0]['16'] * 10000)/10000,
+                                NewR2_KAE:'N/A',
+                                NewR3_KAE:'N/A',
+                                NewR4_KAE:'N/A',
+                                New_KAE_SC_Rates_Correct:'',*/
+
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
                                 NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
@@ -952,7 +962,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/trial.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/lIVE Trial.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
