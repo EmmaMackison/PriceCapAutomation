@@ -7,11 +7,8 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 
 test('DualFuel test', async ({ page }) => {
 
-    //     const obje = new ElectircMeterActions();
-    //   obje.ePass();
-    // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Multi - Dual Fuel - ODP - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Warmer Home Plan - Multi - Elec Only - ODP - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -29,8 +26,8 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
-        //Below fields are ment for Live Run to check correct price on KAE 
-        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
+        //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
+        NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -83,7 +80,6 @@ test('DualFuel test', async ({ page }) => {
             if (beyondEligibility === undefined) {
                 beyondEligibility = dualFuelBucket[property].Beyond_eligibility;
             }
-
             //Declaring current Electric Meter variable and getting current electric tariff name from data bucket
             let eMeter: string = '';
             let eleTariffName: string = dualFuelBucket[property].Elec_Tariff_Name;
@@ -596,25 +592,33 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
                                 //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
-                                /* NewSC_KAE:Math.round(standardElectricPrice[0]['12'] * 10000)/10000,
-                                 NewR1_KAE:Math.round(standardElectricPrice[0]['16'] * 10000)/10000,
-                                 NewR2_KAE:Math.round(standardElectricPrice[0]['19'] * 10000)/10000,
-                                 NewR3_KAE:Math.round(standardElectricPrice[0]['22'] * 10000)/10000,
-                                 NewR4_KAE:Math.round(standardElectricPrice[0]['25'] * 10000)/10000,
-                                 New_KAE_SC_Rates_Correct:'',*/
-
-
-
+                                NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
+                                NewR1_KAE: Math.round(standardElectricPrice[0]['16'] * 10000) / 10000,
+                                NewR2_KAE: Math.round(standardElectricPrice[0]['19'] * 10000) / 10000,
+                                NewR3_KAE: Math.round(standardElectricPrice[0]['22'] * 10000) / 10000,
+                                NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
+                                New_KAE_SC_Rates_Correct: '',
+                                /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /* NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
                                 NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat, NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
                                 NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat, NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),*/
-                                NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
+
+                                /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
                                 NewR1_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardElectricPrice[0]['17.0000'] * 10000) / 10000,
                                 NewR2_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat * 10000) / 10000, NewR2_PriceFile: Math.round(standardElectricPrice[0]['20.0000'] * 10000) / 10000,
                                 NewR3_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat * 10000) / 10000, NewR3_PriceFile: Math.round(standardElectricPrice[0]['23.0000'] * 10000) / 10000,
-                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,
+                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,*/
+
+                                /******Logic 3: To convert 6 digit after decimal to 4 digit after decimal */
+                                NewSC_PIN: (Number(dualFuelBucket[property].Elec_New_Stdg_Chrg) + 1e-10).toFixed(4), NewSC_PriceFile: (Number(standardElectricPrice[0]['13.0000']) + 1e-10).toFixed(4),
+                                NewR1_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat) + 1e-10).toFixed(4), NewR1_PriceFile: (Number(standardElectricPrice[0]['17.0000']) + 1e-10).toFixed(4),
+                                NewR2_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat) + 1e-10).toFixed(4), NewR2_PriceFile: (Number(standardElectricPrice[0]['20.0000']) + 1e-10).toFixed(4),
+                                NewR3_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat) + 1e-10).toFixed(4), NewR3_PriceFile: (Number(standardElectricPrice[0]['23.0000']) + 1e-10).toFixed(4),
+                                NewR4_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat) + 1e-10).toFixed(4), NewR4_PriceFile: (Number(standardElectricPrice[0]['26.0000']) + 1e-10).toFixed(4),
+
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
@@ -801,15 +805,6 @@ test('DualFuel test', async ({ page }) => {
                     if (gasFinalPriceData.length) {
                         const standardGasPrice: any[] = gasFinalPriceData.filter(newPrice => newPrice[4] === 'Gas');
                         if (standardGasPrice.length) {
-                            /*const gPass = () => {        
-                                if (Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat).toFixed(4) === Number(standardGasPrice[0]['13.0000']).toFixed(4)) {
-                                    return 'Pass';
-                                }
-                                else {
-                                    console.log(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, standardGasPrice[0]['13.0000'])
-                                    return 'Fail';
-                                }
-                            }*/
                             const totalGasCurrentCost = () => {//Calculating total gas current cost
                                 let standingCharge = 365 * Number(standardGasPrice[0]['13.0000']);
                                 let rate1 = Number(standardGasPrice[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
@@ -882,18 +877,22 @@ test('DualFuel test', async ({ page }) => {
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
-                                //Below 5 values only for Live Run to check correct price (Excluding VAT) in KAE  
-                                /*NewSC_KAE:Math.round(standardGasPrice[0]['12'] * 10000)/10000,
-                                NewR1_KAE:Math.round(standardGasPrice[0]['16'] * 10000)/10000,
-                                NewR2_KAE:'N/A',
-                                NewR3_KAE:'N/A',
-                                NewR4_KAE:'N/A',
-                                New_KAE_SC_Rates_Correct:'',*/
-
+                                //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need  
+                                NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
+                                NewR1_KAE: Math.round(standardGasPrice[0]['16'] * 10000) / 10000,
+                                NewR2_KAE: 'N/A',
+                                NewR3_KAE: 'N/A',
+                                NewR4_KAE: 'N/A',
+                                New_KAE_SC_Rates_Correct: '',
+                                /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
-                                NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
-                                NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,
+                                /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
+                                NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,*/
+                                /******Logic 3: To convert 6 digit after decimal to 4 digit after decimal */
+                                NewSC_PIN: (Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat) + 1e-10).toFixed(4), NewSC_PriceFile: (Number(standardGasPrice[0]['13.0000']) + 1e-10).toFixed(4),
+                                NewR1_PIN: (Number(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat) + 1e-10).toFixed(4), NewR1_PriceFile: (Number(standardGasPrice[0]['17.0000']) + 1e-10).toFixed(4),
                                 NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
                                 NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
                                 NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',
@@ -962,7 +961,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/lIVE Trial.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/WHPMultiElectricOnlyODP.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
