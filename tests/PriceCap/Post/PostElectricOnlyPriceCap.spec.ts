@@ -29,8 +29,8 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
-        //Below fields are ment for Live Run to check correct price on KAE 
-        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
+        //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
+        NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -249,14 +249,6 @@ test('DualFuel test', async ({ page }) => {
                         const standardElectricPrice = eleFinalPriceData.filter(newPrice => newPrice[4] === 'Electric');
 
                         if (standardElectricPrice.length) {
-                            /*const ePass = () => {
-                                if (Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4) === Number(standardElectricPrice[0]['13.0000']).toFixed(4)) {
-                                    return 'Pass';
-                                }
-                                else {
-                                    return 'Fail';
-                                }
-                            }*/
                             let stMeter = standardElectricPrice[0][3];//this would be actual eMeter for this customer                         
                             let switchMeterDecider = '';
                             let meterChecker = true;
@@ -604,22 +596,33 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
                                 //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
-                                /* NewSC_KAE:Math.round(standardElectricPrice[0]['12'] * 10000)/10000,
-                                 NewR1_KAE:Math.round(standardElectricPrice[0]['16'] * 10000)/10000,
-                                 NewR2_KAE:Math.round(standardElectricPrice[0]['19'] * 10000)/10000,
-                                 NewR3_KAE:Math.round(standardElectricPrice[0]['22'] * 10000)/10000,
-                                 NewR4_KAE:Math.round(standardElectricPrice[0]['25'] * 10000)/10000,
-                                 New_KAE_SC_Rates_Correct:'',*/
+                                NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
+                                NewR1_KAE: Math.round(standardElectricPrice[0]['16'] * 10000) / 10000,
+                                NewR2_KAE: Math.round(standardElectricPrice[0]['19'] * 10000) / 10000,
+                                NewR3_KAE: Math.round(standardElectricPrice[0]['22'] * 10000) / 10000,
+                                NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
+                                New_KAE_SC_Rates_Correct: '',
+                                /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /* NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
                                 NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat, NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
                                 NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat, NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),*/
-                                NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
+
+                                /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
                                 NewR1_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardElectricPrice[0]['17.0000'] * 10000) / 10000,
                                 NewR2_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat * 10000) / 10000, NewR2_PriceFile: Math.round(standardElectricPrice[0]['20.0000'] * 10000) / 10000,
                                 NewR3_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat * 10000) / 10000, NewR3_PriceFile: Math.round(standardElectricPrice[0]['23.0000'] * 10000) / 10000,
-                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,
+                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,*/
+
+                                /******Logic 3: To convert 6 digit after decimal to 4 digit after decimal */
+                                NewSC_PIN: (Number(dualFuelBucket[property].Elec_New_Stdg_Chrg) + 1e-10).toFixed(4), NewSC_PriceFile: (Number(standardElectricPrice[0]['13.0000']) + 1e-10).toFixed(4),
+                                NewR1_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat) + 1e-10).toFixed(4), NewR1_PriceFile: (Number(standardElectricPrice[0]['17.0000']) + 1e-10).toFixed(4),
+                                NewR2_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat) + 1e-10).toFixed(4), NewR2_PriceFile: (Number(standardElectricPrice[0]['20.0000']) + 1e-10).toFixed(4),
+                                NewR3_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat) + 1e-10).toFixed(4), NewR3_PriceFile: (Number(standardElectricPrice[0]['23.0000']) + 1e-10).toFixed(4),
+                                NewR4_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat) + 1e-10).toFixed(4), NewR4_PriceFile: (Number(standardElectricPrice[0]['26.0000']) + 1e-10).toFixed(4),
+
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
@@ -681,7 +684,6 @@ test('DualFuel test', async ({ page }) => {
         else {
             console.log(`zone missing for Ele A/c${dualFuelBucket[property].Elec_Customer_No} `);
         }
-
     }
 
     annotate('The we should be able to generate new CSV testing file');

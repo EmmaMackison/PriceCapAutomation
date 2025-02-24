@@ -7,9 +7,6 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 
 test('DualFuel test', async ({ page }) => {
 
-    //     const obje = new ElectircMeterActions();
-    //   obje.ePass();
-    // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
     const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Gas Only - On Demand - Post.csv"), {
         columns: true,
@@ -29,14 +26,14 @@ test('DualFuel test', async ({ page }) => {
         Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
-        //Below fields are ment for Live Run to check correct price on KAE 
-        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
+        //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
+        NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
-        /*NewR2_PIN: any, NewR2_PriceFile: any,
+        NewR2_PIN: any, NewR2_PriceFile: any,
         NewR3_PIN: any, NewR3_PriceFile: any,
-        NewR4_PIN: any, NewR4_PriceFile: any,*/
+        NewR4_PIN: any, NewR4_PriceFile: any,
         New_SC_Rates_Correct: string,
 
         OldAnnualCost: number, NewAnnualCost: number, ChangeDifference: number, ChangeAmountCorrect: String,
@@ -57,11 +54,11 @@ test('DualFuel test', async ({ page }) => {
         '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity',
         '1 Year Fixed + Greener Electricity Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
         '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7'];
-    const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate',
-        'THTC', 'Flex Rate', '2 Rate (Heating)', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
+    const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate (Heating)', '2 Rate',
+        'THTC', 'Flex Rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',];
     const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity'];
-    const twoRateMeters = ['2 Rate', 'Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)',
+    const twoRateMeters = ['Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)', '2 Rate',
         'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7'];
     const threeRateMeters = ['3 rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)', 'Economy & Heating Load', 'Heatwise 3 Rate', 'Region Specific'];
     const fourRateMeters = '4 rate';
@@ -100,7 +97,7 @@ test('DualFuel test', async ({ page }) => {
                 if ((cheapestSimilarGas === 'Simpler Energy' || cheapestSimilarGas === 'Warmer Home Plan' || cheapestSimilarGas === 'Pay As You Go')) {
                     cheapestSimilarGas = 'Standard';
                 }
-                else {
+                else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestSimilarGas.includes(element)) {
                             cheapestSimilarGas = element;
@@ -135,7 +132,7 @@ test('DualFuel test', async ({ page }) => {
             });
             if (overallGChecker) {
                 if (cheapestOverallGas === 'Simpler Energy' || cheapestOverallGas === 'Warmer Home Plan' || cheapestOverallGas === 'Pay As You Go') { cheapestOverallGas = 'Standard'; }
-                else {
+                else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestOverallGas.includes(element)) {
                             cheapestOverallGas = element;
@@ -219,15 +216,6 @@ test('DualFuel test', async ({ page }) => {
                     if (gasFinalPriceData.length) {
                         const standardGasPrice: any[] = gasFinalPriceData.filter(newPrice => newPrice[4] === 'Gas');
                         if (standardGasPrice.length) {
-                            /*const gPass = () => {        
-                                if (Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat).toFixed(4) === Number(standardGasPrice[0]['13.0000']).toFixed(4)) {
-                                    return 'Pass';
-                                }
-                                else {
-                                    console.log(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, standardGasPrice[0]['13.0000'])
-                                    return 'Fail';
-                                }
-                            }*/
                             const totalGasCurrentCost = () => {//Calculating total gas current cost
                                 let standingCharge = 365 * Number(standardGasPrice[0]['13.0000']);
                                 let rate1 = Number(standardGasPrice[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
@@ -299,20 +287,25 @@ test('DualFuel test', async ({ page }) => {
                                 Tariff: dualFuelBucket[property].Gas_Tariff_Name,
                                 Meter_Type: standardGasPrice[0]['3'],
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
-                                //Below 5 values only for Live Run to check correct price (Excluding VAT) in KAE  
-                                /*NewSC_KAE:Math.round(standardGasPrice[0]['12'] * 10000)/10000,
-                                NewR1_KAE:Math.round(standardGasPrice[0]['16'] * 10000)/10000,
-                                NewR2_KAE:'N/A',
-                                New_KAE_SC_Rates_Correct:'',*/
-
-
+                                //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need  
+                                NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
+                                NewR1_KAE: Math.round(standardGasPrice[0]['16'] * 10000) / 10000,
+                                NewR2_KAE: 'N/A',
+                                NewR3_KAE: 'N/A',
+                                NewR4_KAE: 'N/A',
+                                New_KAE_SC_Rates_Correct: '',
+                                /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
-                                NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
-                                NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,
+                                /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
+                                NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,*/
+                                /******Logic 3: To convert 6 digit after decimal to 4 digit after decimal */
+                                NewSC_PIN: (Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat) + 1e-10).toFixed(4), NewSC_PriceFile: (Number(standardGasPrice[0]['13.0000']) + 1e-10).toFixed(4),
+                                NewR1_PIN: (Number(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat) + 1e-10).toFixed(4), NewR1_PriceFile: (Number(standardGasPrice[0]['17.0000']) + 1e-10).toFixed(4),
                                 NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
-                                /*NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
-                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',*/
+                                NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
+                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
