@@ -6,9 +6,9 @@ import { annotate } from '../../../src/utils/shared/annotate.ts';
 import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 
 test('DualFuel test', async ({ page }) => {
-
+    // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Warmer Home Plan - Multi - Elec Only - ODP - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Dual Fuel - ODP - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -599,7 +599,7 @@ test('DualFuel test', async ({ page }) => {
                                 NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
                                 New_KAE_SC_Rates_Correct: '',
                                 /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
-                                /* NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
+                                /*NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
                                 NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat, NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
@@ -690,13 +690,13 @@ test('DualFuel test', async ({ page }) => {
                 if ((cheapestSimilarGas === 'Simpler Energy' || cheapestSimilarGas === 'Warmer Home Plan' || cheapestSimilarGas === 'Pay As You Go')) {
                     cheapestSimilarGas = 'Standard';
                 }
-                else {//Below code may be not used for gas as gas will never have multi rate price
+                /*else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestSimilarGas.includes(element)) {
                             cheapestSimilarGas = element;
                         }
                     });
-                }
+                }*/
             }
 
             for (const prop in zoneBasedPriceData) {
@@ -725,13 +725,13 @@ test('DualFuel test', async ({ page }) => {
             });
             if (overallGChecker) {
                 if (cheapestOverallGas === 'Simpler Energy' || cheapestOverallGas === 'Warmer Home Plan' || cheapestOverallGas === 'Pay As You Go') { cheapestOverallGas = 'Standard'; }
-                else {//Below code may be not used for gas as gas will never have multi rate price
+               /* else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestOverallGas.includes(element)) {
                             cheapestOverallGas = element;
                         }
                     });
-                }
+                }*/
             }
             for (const prop in zoneBasedPriceData) {
                 if (cheapestOverallGas === zoneBasedPriceData[prop][3]) {
@@ -961,7 +961,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/WHPMultiElectricOnlyODP.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/SimpleDualODP.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }

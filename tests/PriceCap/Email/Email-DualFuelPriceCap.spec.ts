@@ -6,9 +6,9 @@ import { annotate } from '../../../src/utils/shared/annotate.ts';
 import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 
 test('DualFuel test', async ({ page }) => {
-
+    // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Warmer Home Plan - Multi - Dual Fuel - ODP - Email.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Simpler Energy - Multi - Dual Fuel - DD - Email.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -80,7 +80,6 @@ test('DualFuel test', async ({ page }) => {
             if (beyondEligibility === undefined) {
                 beyondEligibility = dualFuelBucket[property].Beyond_eligibility;
             }
-
             //Declaring current Electric Meter variable and getting current electric tariff name from data bucket
             let eMeter: string = '';
             let eleTariffName: string = dualFuelBucket[property].Elec_Tariff_Name;
@@ -693,13 +692,13 @@ test('DualFuel test', async ({ page }) => {
                 if ((cheapestSimilarGas === 'Simpler Energy' || cheapestSimilarGas === 'Warmer Home Plan' || cheapestSimilarGas === 'Pay As You Go')) {
                     cheapestSimilarGas = 'Standard';
                 }
-                else {//Below code may be not used for gas as gas will never have multi rate price
+                /*else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestSimilarGas.includes(element)) {
                             cheapestSimilarGas = element;
                         }
                     });
-                }
+                }*/
             }
 
             for (const prop in zoneBasedPriceData) {
@@ -728,13 +727,13 @@ test('DualFuel test', async ({ page }) => {
             });
             if (overallGChecker) {
                 if (cheapestOverallGas === 'Simpler Energy' || cheapestOverallGas === 'Warmer Home Plan' || cheapestOverallGas === 'Pay As You Go') { cheapestOverallGas = 'Standard'; }
-                else {//Below code may be not used for gas as gas will never have multi rate price
+                /*else {//Below code may be not used for gas as gas will never have multi rate price
                     multiRateElectircMeters.forEach((element) => {
                         if (cheapestOverallGas.includes(element)) {
                             cheapestOverallGas = element;
                         }
                     });
-                }
+                }*/
             }
             for (const prop in zoneBasedPriceData) {
                 if (cheapestOverallGas === zoneBasedPriceData[prop][3]) {
@@ -905,6 +904,7 @@ test('DualFuel test', async ({ page }) => {
                                 OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
                                 NewAnnualCost: dualFuelBucket[property].Gas_Total_New_Cost,
                                 ChangeDifference: Number(dualFuelBucket[property].Gas_Total_New_Cost - dualFuelBucket[property].Gas_Total_Old_Cost),
+                                //ChangeDifference: (Number(dualFuelBucket[property].Gas_Total_New_Cost - dualFuelBucket[property].Gas_Total_Old_Cost)+ 1e-10).toFixed(2),
                                 ChangeAmountCorrect: '',
                                 AreFrontPageCalculationCorrect: '',
 
@@ -959,7 +959,7 @@ test('DualFuel test', async ({ page }) => {
             console.log(`zone missing for Ele A/c${dualFuelBucket[property].Elec_Customer_No} Gas A/c ${dualFuelBucket[property].Gas_Customer_No} `);
         }
     }
-
+   
     annotate('The we should be able to generate new CSV testing file');
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {

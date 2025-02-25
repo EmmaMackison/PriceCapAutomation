@@ -7,8 +7,6 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 
 test('DualFuel test', async ({ page }) => {
 
-    //     const obje = new ElectircMeterActions();
-    //   obje.ePass();
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
     const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Pay As You Go - Multi - Elec Only - Email.csv"), {
@@ -22,7 +20,7 @@ test('DualFuel test', async ({ page }) => {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
-    })
+    });
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
         Date: string, Checker: string,
@@ -30,7 +28,7 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
         //Below fields are ment for Live Run to check correct price on KAE 
-        /* NewSC_KAE:any,NewR1_KAE:any,NewR2_KAE:any,NewR3_KAE:any,NewR4_KAE:any, New_KAE_SC_Rates_Correct:any, */
+        NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -598,22 +596,31 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
                                 //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
-                                /* NewSC_KAE:Math.round(standardElectricPrice[0]['12'] * 10000)/10000,
-                                 NewR1_KAE:Math.round(standardElectricPrice[0]['16'] * 10000)/10000,
-                                 NewR2_KAE:Math.round(standardElectricPrice[0]['19'] * 10000)/10000,
-                                 NewR3_KAE:Math.round(standardElectricPrice[0]['22'] * 10000)/10000,
-                                 NewR4_KAE:Math.round(standardElectricPrice[0]['25'] * 10000)/10000,
-                                 New_KAE_SC_Rates_Correct:'',*/
+                                NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
+                                NewR1_KAE: Math.round(standardElectricPrice[0]['16'] * 10000) / 10000,
+                                NewR2_KAE: Math.round(standardElectricPrice[0]['19'] * 10000) / 10000,
+                                NewR3_KAE: Math.round(standardElectricPrice[0]['22'] * 10000) / 10000,
+                                NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
+                                New_KAE_SC_Rates_Correct: '',
+                                /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4), NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat).toFixed(4), NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
                                 NewR2_PIN: Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat).toFixed(4), NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
                                 NewR3_PIN: Number(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat).toFixed(4), NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
                                 NewR4_PIN:Number(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat).toFixed(4), NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),*/
-                                NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
+                                /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
                                 NewR1_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardElectricPrice[0]['17.0000'] * 10000) / 10000,
                                 NewR2_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat * 10000) / 10000, NewR2_PriceFile: Math.round(standardElectricPrice[0]['20.0000'] * 10000) / 10000,
                                 NewR3_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat * 10000) / 10000, NewR3_PriceFile: Math.round(standardElectricPrice[0]['23.0000'] * 10000) / 10000,
-                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,
+                                NewR4_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat * 10000) / 10000, NewR4_PriceFile: Math.round(standardElectricPrice[0]['26.0000'] * 10000) / 10000,*/
+
+                                /******Logic 3: To convert 6 digit after decimal to 4 digit after decimal */
+                                NewSC_PIN: (Number(dualFuelBucket[property].Elec_New_Stdg_Chrg) + 1e-10).toFixed(4), NewSC_PriceFile: (Number(standardElectricPrice[0]['13.0000']) + 1e-10).toFixed(4),
+                                NewR1_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat) + 1e-10).toFixed(4), NewR1_PriceFile: (Number(standardElectricPrice[0]['17.0000']) + 1e-10).toFixed(4),
+                                NewR2_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat) + 1e-10).toFixed(4), NewR2_PriceFile: (Number(standardElectricPrice[0]['20.0000']) + 1e-10).toFixed(4),
+                                NewR3_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat) + 1e-10).toFixed(4), NewR3_PriceFile: (Number(standardElectricPrice[0]['23.0000']) + 1e-10).toFixed(4),
+                                NewR4_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat) + 1e-10).toFixed(4), NewR4_PriceFile: (Number(standardElectricPrice[0]['26.0000']) + 1e-10).toFixed(4),
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
@@ -635,7 +642,6 @@ test('DualFuel test', async ({ page }) => {
                                 //Calculated_Similar_Saving: returnValue - similarReturnTotalCost,
                                 Calculated_Similar_Saving: calculateSimilarSaving(),
                                 Similar_Saving_Correct: isEleSimilarSavingCorrect(),
-
                                 //OverallTariff: dualFuelBucket[property].Cheapest_Overall_Tariff,
                                 OverallTariff: cheapEleOverallTariff,
                                 //  OverallMeter: finalCheapestOverallData[0]['3'],
