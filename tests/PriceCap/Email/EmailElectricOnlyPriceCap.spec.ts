@@ -6,7 +6,6 @@ import { annotate } from '../../../src/utils/shared/annotate.ts';
 import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 
 test('DualFuel test', async ({ page }) => {
-
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
     const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Pay As You Go - Multi - Elec Only - Email.csv"), {
@@ -16,18 +15,19 @@ test('DualFuel test', async ({ page }) => {
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Latest Dry Run Calculator - April 2025 - Rohit.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Live Run Calculator April 2025 v3 - Rohit - Tariff Info & Rates.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
     });
+
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
         Date: string, Checker: string,
         Account_No: number, Cust_Name_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
-        //Below fields are ment for Live Run to check correct price on KAE 
+        //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
         NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
@@ -50,17 +50,23 @@ test('DualFuel test', async ({ page }) => {
     }
     //Step:4 Declare an object to store and generate new csv with calculation
     const newDualFuelBucketData: Object[] = [];
-    //Step:5 Navigate thorough each row,received  from Step 1: data bucket and perform calculation    
-    const cheapestTariffs: string[] = ['1 Year Fixed', '1 Year Fixed Economy 7', '1 Year Fixed Loyalty', '1 Year Fixed Loyalty Economy 7',
-        '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity',
-        '1 Year Fixed + Greener Electricity Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
-        '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7'];
+    //Step:5 Navigate thorough each row,received  from Step 1: data bucket and perform calculation
+    /* cheapestTariffs array contain all the prices used for cheapest similar and overall, It is highly possible that CTM will be changed every time, so if new priced added then 
+    it should be added to this array as well*/
+    const cheapestTariffs: string[] = ['1 Year Fixed', '1 Year Fixed - Economy 7', '1 Year Fixed Loyalty', '1 Year Fixed Loyalty - Economy 7',
+        '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover - Economy 7', '1 Year Fixed + Greener Electricity', '1 Year Fixed + Greener Electricity - Economy 7', '2 Year Fixed + Heating Control',
+        '2 Year Fixed + Heating Control - Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
+        '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7', 'Extended Fixed', 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco', '2 Year Fixed + Heating Control',
+    ];
+    //multiRateElectricMeters array is to identify correct meter type for multi rate meters  
     const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate (Heating)', '2 Rate',
         'THTC', 'Flex Rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
         '4 Rate', 'Economy & Heating Load', 'Heatwise 2 Rate', 'Heatwise 3 Rate', 'Region Specific',];
-    const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity'];
-    const twoRateMeters = ['Economy 7', '1 Year Fixed Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)', '2 Rate',
-        'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7'];
+    /*Below 4 arrays contains element based on thier meters i.e. standard, two rate, three rate or four Rate, Every time CTM section changed we need to add those new tariffs
+    in below related arrays as well to make sure its been picked up in calculation*/
+    const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity', 'Extended Fixed'];
+    const twoRateMeters = ['Economy 7', '1 Year Fixed Loyalty - Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)', '2 Rate',
+        'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7', 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'];
     const threeRateMeters = ['3 rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)', 'Economy & Heating Load', 'Heatwise 3 Rate', 'Region Specific'];
     const fourRateMeters = '4 rate';
 
@@ -81,7 +87,6 @@ test('DualFuel test', async ({ page }) => {
             if (beyondEligibility === undefined) {
                 beyondEligibility = dualFuelBucket[property].Beyond_eligibility;
             }
-
             //Declaring current Electric Meter variable and getting current electric tariff name from data bucket
             let eMeter: string = '';
             let eleTariffName: string = dualFuelBucket[property].Elec_Tariff_Name;
@@ -100,6 +105,9 @@ test('DualFuel test', async ({ page }) => {
                         cheapestSimilarEle = element; similarChecker = false;
                     }
                 });
+                if (similarChecker) {
+                    if ((cheapestSimilarEle === 'Extended Fixed - Economy 7' || cheapestSimilarEle === 'Extended Fixed - Domestic Economy')) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
+                }
                 if (similarChecker) {
                     if ((cheapestSimilarEle === 'Simpler Energy' || cheapestSimilarEle === 'Warmer Home Plan' || cheapestSimilarEle === 'Pay As You Go')) { cheapestSimilarEle = 'Standard'; }
                     else {
@@ -138,8 +146,12 @@ test('DualFuel test', async ({ page }) => {
                     }
                     /* ***NOTE**** Below If condition will make sure if cutomers cheapest overall is 1 year fixed loyalt-domestic economy then it will be calculated
                     according to 1 year fixed loyalty economy 7*/
-                    if (cheapestOverallEle === "1 Year Fixed Loyalty - Domestic Economy") { cheapestOverallEle = "1 Year Fixed Loyalty Economy 7"; }
+                    if (cheapestOverallEle === "1 Year Fixed Loyalty - Domestic Economy") { cheapestOverallEle = "1 Year Fixed Loyalty - Economy 7"; }
                 });
+                if (overallChecker) {
+                    if ((cheapestOverallEle === 'Extended Fixed - Economy 7' || cheapestOverallEle === 'Extended Fixed - Domestic Economy')) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
+                }
+
                 if (overallChecker) {
                     if (cheapestOverallEle === 'Simpler Energy' || cheapestOverallEle === 'Warmer Home Plan' || cheapestOverallEle === 'Pay As You Go') { cheapestOverallEle = 'Standard'; }
                     else {
