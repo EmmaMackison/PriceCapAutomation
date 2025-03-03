@@ -8,7 +8,7 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 test('DualFuel test', async ({ page }) => {
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Simpler Energy - Multi - Dual Fuel - DD - Email.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Simpler Energy - Multi - Dual Fuel - ODP - Email (1).csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -106,7 +106,10 @@ test('DualFuel test', async ({ page }) => {
                     }
                 });
                 if (similarChecker) {
-                    if ((cheapestSimilarEle === 'Extended Fixed - Economy 7' || cheapestSimilarEle === 'Extended Fixed - Domestic Economy')) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
+                    //First Logic to find out Extended Fixed E7 /Domestic Economy
+                    //if ((cheapestSimilarEle === 'Extended Fixed - Economy 7' || cheapestSimilarEle === 'Extended Fixed - Domestic Economy')) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
+                    //Second changed Logic to find out Extended Fixed E7 /Domestic Economy, can be changed back to above if not working
+                    if ((cheapestSimilarEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Economy 7'.replace(/[^a-zA-Z0-9]/g, '') || cheapestSimilarEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Domestic Economy'.replace(/[^a-zA-Z0-9]/g, ''))) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
                 }
                 if (similarChecker) {
                     if ((cheapestSimilarEle === 'Simpler Energy' || cheapestSimilarEle === 'Warmer Home Plan' || cheapestSimilarEle === 'Pay As You Go')) { cheapestSimilarEle = 'Standard'; }
@@ -149,7 +152,10 @@ test('DualFuel test', async ({ page }) => {
                     if (cheapestOverallEle === "1 Year Fixed Loyalty - Domestic Economy") { cheapestOverallEle = "1 Year Fixed Loyalty - Economy 7"; }
                 });
                 if (overallChecker) {
-                    if ((cheapestOverallEle === 'Extended Fixed - Economy 7' || cheapestOverallEle === 'Extended Fixed - Domestic Economy')) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
+                    //First Logic to find out Extended Fixed E7 /Domestic Economy
+                    //if ((cheapestOverallEle === 'Extended Fixed - Economy 7' || cheapestOverallEle === 'Extended Fixed - Domestic Economy')) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
+                    //Second changed Logic to find out Extended Fixed E7 /Domestic Economy, can be changed back to above if not working
+                    if ((cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Economy 7'.replace(/[^a-zA-Z0-9]/g, '') || cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Domestic Economy'.replace(/[^a-zA-Z0-9]/g, ''))) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
                 }
 
                 if (overallChecker) {
@@ -976,7 +982,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/WHP Multi DF ODP EMAIL.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/SIMPLE MULTI DF ODP EMAIL.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }

@@ -106,7 +106,10 @@ test('DualFuel test', async ({ page }) => {
                     }
                 });
                 if (similarChecker) {
-                    if ((cheapestSimilarEle === 'Extended Fixed - Economy 7' || cheapestSimilarEle === 'Extended Fixed - Domestic Economy')) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
+                    //First Logic to find out Extended Fixed E7 /Domestic Economy
+                    //if ((cheapestSimilarEle === 'Extended Fixed - Economy 7' || cheapestSimilarEle === 'Extended Fixed - Domestic Economy')) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
+                    //Second changed Logic to find out Extended Fixed E7 /Domestic Economy, can be changed back to above if not working
+                    if ((cheapestSimilarEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Economy 7'.replace(/[^a-zA-Z0-9]/g, '') || cheapestSimilarEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Domestic Economy'.replace(/[^a-zA-Z0-9]/g, ''))) { cheapestSimilarEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; similarChecker = false; }
                 }
                 if (similarChecker) {
                     if ((cheapestSimilarEle === 'Simpler Energy' || cheapestSimilarEle === 'Warmer Home Plan' || cheapestSimilarEle === 'Pay As You Go')) { cheapestSimilarEle = 'Standard'; }
@@ -149,7 +152,10 @@ test('DualFuel test', async ({ page }) => {
                     if (cheapestOverallEle === "1 Year Fixed Loyalty - Domestic Economy") { cheapestOverallEle = "1 Year Fixed Loyalty - Economy 7"; }
                 });
                 if (overallChecker) {
-                    if ((cheapestOverallEle === 'Extended Fixed - Economy 7' || cheapestOverallEle === 'Extended Fixed - Domestic Economy')) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
+                    //First Logic to find out Extended Fixed E7 /Domestic Economy
+                    //if ((cheapestOverallEle === 'Extended Fixed - Economy 7' || cheapestOverallEle === 'Extended Fixed - Domestic Economy')) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
+                    //Second changed Logic to find out Extended Fixed E7 /Domestic Economy, can be changed back to above if not working
+                    if ((cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Economy 7'.replace(/[^a-zA-Z0-9]/g, '') || cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '') === 'Extended Fixed - Domestic Economy'.replace(/[^a-zA-Z0-9]/g, ''))) { cheapestOverallEle = 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'; overallChecker = false; }
                 }
 
                 if (overallChecker) {
