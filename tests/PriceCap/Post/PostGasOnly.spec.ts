@@ -44,9 +44,7 @@ test('DualFuel test', async ({ page }) => {
         OverallTariff: string, OverallMeter: string, Calculated_Overall_Projection: number, Calculated_Overall_Saving: number,
         Overall_Saving_Correct: string,
 
-        PresentmentCorrect: string, Incr_Decr_Check: string, Creative: string,
-        PassFailUnsure: string,
-        Comments: string,
+        PresentmentCorrect: string, PassFailUnsure: string, Comments: string,
     }
     //Step:4 Declare an object to store and generate new csv with calculation
     const newDualFuelBucketData: Object[] = [];
@@ -341,9 +339,6 @@ test('DualFuel test', async ({ page }) => {
                                 Overall_Saving_Correct: isGasOverallSavingCorrect(),
 
                                 PresentmentCorrect: '',
-                                Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK,
-                                Creative: dualFuelBucket[property].CREATIVE,
-
                                 PassFailUnsure: '',
                                 Comments: '',
                             }

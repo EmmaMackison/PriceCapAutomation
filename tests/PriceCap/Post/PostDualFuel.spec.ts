@@ -8,7 +8,7 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 test('DualFuel test', async ({ page }) => {
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Warmer Home Plan - Gas Only - DD - Email.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Dual Fuel - ODP - Post (1).csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -23,8 +23,8 @@ test('DualFuel test', async ({ page }) => {
 
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
-        Date: string, Checker: string,
-        Account_No: number, Cust_Name_Correct: string,
+        Date: string, Checker: string, Page: string,
+        Account_No: number, Cust_Name_Correct: string, Cust_Address_Correct: string,
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
         //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
@@ -44,15 +44,13 @@ test('DualFuel test', async ({ page }) => {
         OverallTariff: string, OverallMeter: string, Calculated_Overall_Projection: number, Calculated_Overall_Saving: number,
         Overall_Saving_Correct: string,
 
-        PresentmentCorrect: string, Incr_Decr_Check: string, Creative: string,
-        PassFailUnsure: string,
-        Comments: string,
+        PresentmentCorrect: string, PassFailUnsure: string, Comments: string,
     }
     //Step:4 Declare an object to store and generate new csv with calculation
     const newDualFuelBucketData: Object[] = [];
     //Step:5 Navigate thorough each row,received  from Step 1: data bucket and perform calculation
     /* cheapestTariffs array contain all the prices used for cheapest similar and overall, It is highly possible that CTM will be changed every time, so if new priced added then 
-    it should be added to this array as well*/
+    it should be added to this array as well, also while adding new tariff need to make sure how does it spelled in data file and price file*/
     const cheapestTariffs: string[] = ['1 Year Fixed', '1 Year Fixed - Economy 7', '1 Year Fixed Loyalty', '1 Year Fixed Loyalty - Economy 7',
         '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover - Economy 7', '1 Year Fixed + Greener Electricity', '1 Year Fixed + Greener Electricity - Economy 7', '2 Year Fixed + Heating Control',
         '2 Year Fixed + Heating Control - Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
@@ -73,9 +71,9 @@ test('DualFuel test', async ({ page }) => {
     //Step 5.1 Navigating through each record of data bucket starts here
     for (const property in dualFuelBucket) {
         //Step 5.1.1: Filtering price file according to zone of cutomer
-        let customerZone = dualFuelBucket[property].Zone;
+        let customerZone = dualFuelBucket[property].Zone_1;
         if (customerZone == undefined) {
-            customerZone = dualFuelBucket[property].Zone_1;
+            customerZone = dualFuelBucket[property].Zone;
         }
         let zoneBasedPriceData = newPriceData.filter(function (el) {
             return el[5] === customerZone;
@@ -93,9 +91,9 @@ test('DualFuel test', async ({ page }) => {
             if (!eleTariffName.includes('Fixed')) { //Removing account from calculation if customers currnt price is fixed
                 //Capturing cheapest similar meter and price data based on cheapest meter
                 let cheapestSimilarEleMeter = '';
-                let cheapestSimilarEle = dualFuelBucket[property].Cheapest_Similar_Tariff;
+                let cheapestSimilarEle = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
                 if (cheapestSimilarEle === undefined) {
-                    cheapestSimilarEle = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
+                    cheapestSimilarEle = dualFuelBucket[property].Cheapest_Similar_Tariff;
                 }
                 let similarChecker: boolean = true;
                 let replaceCheapestSimilar = cheapestSimilarEle.replace(/[^a-zA-Z0-9]/g, '');
@@ -136,9 +134,9 @@ test('DualFuel test', async ({ page }) => {
                 //Capturing Cheapest Similar complete here
                 //Capturing cheapest overallmeter information and price data for this meter
                 let cheapestOverallEleMeter = '';
-                let cheapestOverallEle = dualFuelBucket[property].Cheapest_Overall_Tariff;
+                let cheapestOverallEle = dualFuelBucket[property].Elec_Cheapest_Overall_Tariff;
                 if (cheapestOverallEle === undefined) {
-                    cheapestOverallEle = dualFuelBucket[property].Elec_Cheapest_Overall_Tariff;
+                    cheapestOverallEle = dualFuelBucket[property].Cheapest_Overall_Tariff;
                 }
                 let overallChecker = true;
                 let replaceCheapestOverall = cheapestOverallEle.replace(/[^a-zA-Z0-9]/g, '');
@@ -210,10 +208,9 @@ test('DualFuel test', async ({ page }) => {
                     and overall,if cutomer is on demand than cheapest similar and overall would be direct debit, if customer current pay method is DD than cheapest
                     similar and overall will be DD*/
                     //Getting Cheapest Similar Payment method
-
-                    let cheapEleSimilarTariff = (dualFuelBucket[property].Cheapest_Similar_Tariff);
+                    let cheapEleSimilarTariff = (dualFuelBucket[property].Elec_Cheapest_Similar_Tariff);
                     if (cheapEleSimilarTariff === undefined) {
-                        cheapEleSimilarTariff = dualFuelBucket[property].Elec_Cheapest_Similar_Tariff;
+                        cheapEleSimilarTariff = dualFuelBucket[property].Cheapest_Similar_Tariff;
                     }
                     let cheapestSimilarPaymentMethod = '';
                     if (cheapEleSimilarTariff.includes('Pay As You Go')) {
@@ -222,11 +219,10 @@ test('DualFuel test', async ({ page }) => {
                     else { cheapestSimilarPaymentMethod = 'Direct Debit'; }
                     //End of getting Cheapest Similar Payment Method
                     //Getting Cheapest Overall Payment Method
-                    let cheapEleOverallTariff = (dualFuelBucket[property].Cheapest_Overall_Tariff);
+                    let cheapEleOverallTariff = (dualFuelBucket[property].Elec_Cheapest_Overall_Tariff);
                     if (cheapEleOverallTariff === undefined) {
-                        cheapEleOverallTariff = dualFuelBucket[property].Elec_Cheapest_Overall_Tariff;
+                        cheapEleOverallTariff = dualFuelBucket[property].Cheapest_Overall_Tariff;
                     }
-
                     // if (elePaymentMethod !== 'Prepayment') { cheapestSimilarPaymentMethod = 'Direct Debit', cheapestOverallPaymentMethod = 'Direct Debit'; }
                     // else { cheapestSimilarPaymentMethod = 'Prepayment'; cheapestOverallPaymentMethod = 'Prepayment'; }
                     let cheapestOverallPaymentMethod = '';
@@ -603,11 +599,11 @@ test('DualFuel test', async ({ page }) => {
                             }
                             //Assignment of proofing Sheet object
                             const eleProofingSheetObject: ProofingObject & { [key: string]: any } = {
-                                Date: '', Checker: '',
-                                Account_No: dualFuelBucket[property].Elec_Customer_No, Cust_Name_Correct: '',
+                                Date: '', Checker: '', Page: '',
+                                Account_No: dualFuelBucket[property].Elec_Customer_No, Cust_Name_Correct: '', Cust_Address_Correct: '',
                                 Beyond_Eligibility: beyondEligibility,
                                 Marketing_Preference: dualFuelBucket[property].Marketing_pref, Marketing_Consent_Correct: '',
-                                // GSP: dualFuelBucket[property].Zone, 
+                                // GSP: dualFuelBucket[property].Zone_1,
                                 GSP: customerZone, Fuel: 'Electric',
                                 Tariff: dualFuelBucket[property].Elec_Tariff_Name,
                                 Meter_Type: standardElectricPrice[0]['3'],
@@ -621,11 +617,12 @@ test('DualFuel test', async ({ page }) => {
                                 NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
                                 New_KAE_SC_Rates_Correct: '',
                                 /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
-                                /*NewSC_PIN: Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4), NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
-                                NewR1_PIN: Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat).toFixed(4), NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
-                                NewR2_PIN: Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat).toFixed(4), NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
-                                NewR3_PIN: Number(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat).toFixed(4), NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
-                                NewR4_PIN:Number(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat).toFixed(4), NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),*/
+                                /*NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
+                                NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
+                                NewR2_PIN: dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat, NewR2_PriceFile: Number(standardElectricPrice[0]['20.0000']).toFixed(4),
+                                NewR3_PIN: dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat, NewR3_PriceFile: Number(standardElectricPrice[0]['23.0000']).toFixed(4),
+                                NewR4_PIN: dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat, NewR4_PriceFile: Number(standardElectricPrice[0]['26.0000']).toFixed(4),*/
+
                                 /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: Math.round(dualFuelBucket[property].Elec_New_Stdg_Chrg * 10000) / 10000, NewSC_PriceFile: Math.round(standardElectricPrice[0]['13.0000'] * 10000) / 10000,
                                 NewR1_PIN: Math.round(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardElectricPrice[0]['17.0000'] * 10000) / 10000,
@@ -639,6 +636,7 @@ test('DualFuel test', async ({ page }) => {
                                 NewR2_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_2_Inc_Vat) + 1e-10).toFixed(4), NewR2_PriceFile: (Number(standardElectricPrice[0]['20.0000']) + 1e-10).toFixed(4),
                                 NewR3_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_3_Inc_Vat) + 1e-10).toFixed(4), NewR3_PriceFile: (Number(standardElectricPrice[0]['23.0000']) + 1e-10).toFixed(4),
                                 NewR4_PIN: (Number(dualFuelBucket[property].Elec_New_Unit_4_Inc_Vat) + 1e-10).toFixed(4), NewR4_PriceFile: (Number(standardElectricPrice[0]['26.0000']) + 1e-10).toFixed(4),
+
                                 New_SC_Rates_Correct: '',
 
                                 OldAnnualCost: dualFuelBucket[property].Elec_Total_Old_Cost,
@@ -652,7 +650,7 @@ test('DualFuel test', async ({ page }) => {
                                 // Difference: (dualFuelBucket[property].Elec_Annual_Usage * standardElectricPrice[0]['17.0000'] / dualFuelBucket[property].Elec_Total_New_Cost),
                                 Difference: ((returnValue / dualFuelBucket[property].Elec_Total_New_Cost) * 100).toFixed(2) + '%',
 
-                                //SimilarTariff: dualFuelBucket[property].Cheapest_Similar_Tariff,
+                                //SimilarTariff: dualFuelBucket[property].Elec_Cheapest_Similar_Tariff,
                                 SimilarTariff: cheapEleSimilarTariff,
                                 SimilarMeter: similarMeter,
                                 // SimilarMeter: finalCheapestSimilarData[0]['3'],
@@ -660,23 +658,18 @@ test('DualFuel test', async ({ page }) => {
                                 //Calculated_Similar_Saving: returnValue - similarReturnTotalCost,
                                 Calculated_Similar_Saving: calculateSimilarSaving(),
                                 Similar_Saving_Correct: isEleSimilarSavingCorrect(),
-                                //OverallTariff: dualFuelBucket[property].Cheapest_Overall_Tariff,
+                                //OverallTariff: dualFuelBucket[property].Elec_Cheapest_Overall_Tariff,
                                 OverallTariff: cheapEleOverallTariff,
-                                //  OverallMeter: finalCheapestOverallData[0]['3'],
                                 OverallMeter: overallMeter,
+                                // OverallMeter: finalCheapestOverallData[0]['3'],
                                 Calculated_Overall_Projection: returnOverallValue,
                                 //Calculated_Overall_Saving: returnValue - returnOverallValue,
                                 Calculated_Overall_Saving: calculateOverallSaving(),
                                 //Overall_Saving_Correct: (((elecheapestOverallSaving) / (returnValue - returnOverallValue)) * 100).toFixed(2) + '%',
                                 Overall_Saving_Correct: isEleOverallSavingCorrect(),
-
                                 PresentmentCorrect: '',
-                                Incr_Decr_Check: dualFuelBucket[property].INCR_DECR_CHECK,//This field not present in Email data file hence it will be blank
-                                Creative: dualFuelBucket[property].CREATIVE,//This field not present in Email data file hence it will be blank
                                 PassFailUnsure: '',
                                 Comments: '',
-
-
                             }
                             newDualFuelBucketData.push(eleProofingSheetObject);
                             //Single Ele Object finish here
@@ -698,10 +691,283 @@ test('DualFuel test', async ({ page }) => {
                 console.log(` Electric Account ${dualFuelBucket[property].Elec_Customer_No} Excluded from calculation, Current Tariff is Fixed`);
             }
             //Capturing cheapest similar gas prices         
-        }
 
+            let cheapestSimilarGasMeter = '';
+            let cheapestSimilarGas = dualFuelBucket[property].Gas_Cheapest_Similar_Tariff;
+            let replaceGasSimilar = cheapestSimilarGas.replace(/[^a-zA-Z0-9]/g, '');
+            let similarGChecker: boolean = true;
+            cheapestTariffs.forEach((element) => {
+                let ele = element.replace(/[^a-zA-Z0-9]/g, '');
+                if (replaceGasSimilar === ele && replaceGasSimilar.length === ele.length) {
+                    cheapestSimilarGas = element; similarGChecker = false;
+                } //else { similarGChecker = true; }
+            });
+
+            if (similarGChecker) {
+                if ((cheapestSimilarGas === 'Simpler Energy' || cheapestSimilarGas === 'Warmer Home Plan' || cheapestSimilarGas === 'Pay As You Go')) {
+                    cheapestSimilarGas = 'Standard';
+                }
+                /*else {//Below code may be not used for gas as gas will never have multi rate price
+                    multiRateElectircMeters.forEach((element) => {
+                        if (cheapestSimilarGas.includes(element)) {
+                            cheapestSimilarGas = element;
+                        }
+                    });
+                }*/
+            }
+
+            for (const prop in zoneBasedPriceData) {
+                if (cheapestSimilarGas === zoneBasedPriceData[prop][3]) {
+                    cheapestSimilarGasMeter = cheapestSimilarGas;
+                }
+                // else{ cheapestSimilarGas ='';}
+            }
+            let cheapestGasSimilarPriceData = [];
+            if (cheapestSimilarGasMeter !== '') {
+                cheapestGasSimilarPriceData = zoneBasedPriceData.filter(function (el) {
+                    return (el[3] === cheapestSimilarGasMeter && el[4] === 'Gas');
+                });
+            }
+            //Capturing cheapest overall gas
+            let cheapestOverallGasMeter = '';
+            let cheapestOverallGas = dualFuelBucket[property].Gas_Cheapest_Overall_Tariff;
+            let overallGChecker = true;
+            let replaceGasOverall = cheapestOverallGas.replace(/[^a-zA-Z0-9]/g, '');
+
+            cheapestTariffs.forEach((element) => {
+                let ele = element.replace(/[^a-zA-Z0-9]/g, '');
+                if (replaceGasOverall === ele && replaceGasOverall.length === ele.length) { cheapestOverallGas = element; overallGChecker = false; }
+                // else { overallGChecker = true; }
+
+            });
+            if (overallGChecker) {
+                if (cheapestOverallGas === 'Simpler Energy' || cheapestOverallGas === 'Warmer Home Plan' || cheapestOverallGas === 'Pay As You Go') { cheapestOverallGas = 'Standard'; }
+                /*else {//Below code may be not used for gas as gas will never have multi rate price
+                    multiRateElectircMeters.forEach((element) => {
+                        if (cheapestOverallGas.includes(element)) {
+                            cheapestOverallGas = element;
+                        }
+                    });
+                }*/
+            }
+            for (const prop in zoneBasedPriceData) {
+                if (cheapestOverallGas === zoneBasedPriceData[prop][3]) {
+                    cheapestOverallGasMeter = cheapestOverallGas;
+                }
+                //else{cheapestOverallGas = '';}
+            }
+            let cheapestGasOverallPriceData = [];
+            if (cheapestOverallGasMeter !== '') {
+                cheapestGasOverallPriceData = zoneBasedPriceData.filter(function (el) {
+                    return (el[3] === cheapestOverallGasMeter && el[4] === 'Gas');
+                });
+            }
+            //Capturing current Gas Meter Type
+            let gMeter: string = '';
+            let gasTariffName: string = dualFuelBucket[property].Gas_Tariff_Name;
+            if (!gasTariffName.includes('Fixed')) {
+                if (gasTariffName === 'Simpler Energy' || gasTariffName === 'Warmer Home Plan' || gasTariffName === 'Pay As You Go') { gasTariffName = 'Standard'; }
+                else {
+                    gasTariffName = '';
+                }
+                for (const prop in zoneBasedPriceData) {
+                    if (gasTariffName === zoneBasedPriceData[prop][3]) {
+                        gMeter = gasTariffName;
+                    }
+                }
+                let gasMeterBasedPriceData = [];
+                if (gMeter !== '') {
+                    gasMeterBasedPriceData = zoneBasedPriceData.filter(function (el) {
+                        return (el[3] === gMeter);
+                    });
+                }
+                if (gasMeterBasedPriceData.length) {
+
+                    let cheapestSimilarGasPaymentMethod = '';
+                    const cheapGasSimilarPayMethod = (dualFuelBucket[property].Gas_Cheapest_Similar_Tariff);
+                    const cheapGasOverallPayMethod = (dualFuelBucket[property].Gas_Cheapest_Overall_Tariff);
+                    let cheapestSimilarPaymentMethod = '';
+                    if (cheapGasSimilarPayMethod.includes('Pay As You Go')) {
+                        cheapestSimilarGasPaymentMethod = 'Prepayment';
+                    }
+                    else { cheapestSimilarGasPaymentMethod = 'Direct Debit'; }
+                    let finalCheapestGasSimilarData = cheapestGasSimilarPriceData.filter(function (el) {
+                        return el[10] === cheapestSimilarGasPaymentMethod;
+                    });
+                    let cheapestOverallGasPaymentMethod = '';
+                    let cheapestOverallPaymentMethod = '';
+                    if (cheapGasOverallPayMethod.includes('Pay As You Go')) {
+                        cheapestOverallGasPaymentMethod = 'Prepayment';
+                    }
+                    else { cheapestOverallGasPaymentMethod = 'Direct Debit'; }
+                    let finalCheapestGasOverallData = cheapestGasOverallPriceData.filter(function (el) {
+                        return el[10] === cheapestOverallGasPaymentMethod;
+                    });
+                    const gasPaymentMethod = dualFuelBucket[property].Gas_Payment_Method;
+                    const checkGasWarmerTariff = dualFuelBucket[property].Gas_Tariff_Name;
+                    let gasPayMethod = '';
+                    if (checkGasWarmerTariff.includes('Warmer Home Plan')) {
+                        gasPayMethod = 'Direct Debit';
+                    }
+                    else {
+                        for (const prop1 in gasMeterBasedPriceData) {
+                            if (gasPaymentMethod === gasMeterBasedPriceData[prop1][10]) {
+                                gasPayMethod = gasPaymentMethod;
+                            }
+                        }
+                    }
+                    let gasFinalPriceData = gasMeterBasedPriceData.filter(function (el) {
+                        return (el[10] === gasPayMethod);
+                    });
+                    if (gasFinalPriceData.length) {
+                        const standardGasPrice: any[] = gasFinalPriceData.filter(newPrice => newPrice[4] === 'Gas');
+                        if (standardGasPrice.length) {
+                            const totalGasCurrentCost = () => {//Calculating total gas current cost
+                                let standingCharge = 365 * Number(standardGasPrice[0]['13.0000']);
+                                let rate1 = Number(standardGasPrice[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
+                                return Number((rate1 + standingCharge).toFixed(2));
+                            }
+                            const totalGasSimilarCost = () => {
+                                if (finalCheapestGasSimilarData.length) {//Calculating total gas similar cost
+                                    let standingCharge = 365 * Number(finalCheapestGasSimilarData[0]['13.0000']);
+                                    let rate1 = Number(finalCheapestGasSimilarData[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
+                                    return Number((rate1 + standingCharge).toFixed(2));
+                                } else { return 0; }
+                            }
+
+                            const totalGasOverallCost = () => {
+                                if (finalCheapestGasOverallData.length) {//Calculating total gas overall cost
+                                    let standingCharge = 365 * Number(finalCheapestGasOverallData[0]['13.0000']);
+                                    let rate1 = Number(finalCheapestGasOverallData[0]['17.0000']) * Number(dualFuelBucket[property].Gas_Annual_Usage);
+                                    return Number((rate1 + standingCharge).toFixed(2));
+                                }
+                                else { return 0; }
+                            }
+                            //Calculating gas similar saving
+                            function calculateGasSimilarSaving() {
+                                if (totalGasCurrentCost() !== 0 && totalGasSimilarCost() !== 0) {
+                                    return totalGasCurrentCost() - totalGasSimilarCost();
+                                }
+                                else { return 0; }
+                            }
+                            //Making sure gas similar saving is correct or not
+                            let gasCheapestSimilarSaving: number = Number(dualFuelBucket[property].Gas_Cheapest_Saving);
+                            if (gasCheapestSimilarSaving === undefined) {
+                                gasCheapestSimilarSaving = Number(dualFuelBucket[property].Gas_Cheapest_Similar_Saving);
+                            }
+                            function isGasSimilarSavingCorrect() {
+                                let UL: number = (gasCheapestSimilarSaving + gasCheapestSimilarSaving * 0.05);
+                                let LL: number = (gasCheapestSimilarSaving - gasCheapestSimilarSaving * 0.05);
+                                let similarSaving: number = totalGasCurrentCost() - totalGasSimilarCost();
+                                if (similarSaving === 0) { return 'No Similar Saving' }
+                                else { return (similarSaving >= LL && similarSaving <= UL) ? 'Yes' : 'No'; }
+
+                            }
+                            //Calculating gas overall saving
+                            function calculateGasOverallSaving() {
+                                if (totalGasCurrentCost() !== 0 && totalGasOverallCost() !== 0) {
+                                    return totalGasCurrentCost() - totalGasOverallCost();
+                                }
+                                else { return 0; }
+                            }
+                            //Making sure is gas overall saving is correct or not
+                            let gasCheapestOverallSaving: number = Number(dualFuelBucket[property].Gas_Overall_Saving);
+                            function isGasOverallSavingCorrect() {
+                                let UL: number = (gasCheapestOverallSaving + gasCheapestOverallSaving * 0.05);
+                                let LL: number = (gasCheapestOverallSaving - gasCheapestOverallSaving * 0.05);
+                                let overallSaving: number = totalGasCurrentCost() - totalGasOverallCost();
+                                if (overallSaving === 0) { return 'No Overall Saving' }
+                                else {
+                                    return overallSaving >= LL && overallSaving <= UL ? 'Yes' : 'No';
+                                }
+                            }
+
+                            //Single Gas object start here  
+                            const gasProofingSheetObject: ProofingObject & { [key: string]: any } = {
+                                Date: '', Checker: '', Page: '',
+                                Account_No: dualFuelBucket[property].Gas_Customer_No, Cust_Name_Correct: '', Cust_Address_Correct: '',
+                                Beyond_Eligibility: beyondEligibility,
+                                Marketing_Preference: dualFuelBucket[property].Marketing_pref, Marketing_Consent_Correct: '',
+                                //GSP: dualFuelBucket[property].Zone_1, 
+                                GSP: customerZone, Fuel: 'Gas',
+                                Tariff: dualFuelBucket[property].Gas_Tariff_Name,
+                                Meter_Type: standardGasPrice[0]['3'],
+                                Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
+
+                                //Below 5 values only for Live Run to check correct price on KAE (Excluding VAT) in KAE.Need to remove and add comments according to need  
+                                NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
+                                NewR1_KAE: Math.round(standardGasPrice[0]['16'] * 10000) / 10000,
+                                NewR2_KAE: 'N/A',
+                                NewR3_KAE: 'N/A',
+                                NewR4_KAE: 'N/A',
+                                New_KAE_SC_Rates_Correct: '',
+                                /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
+                                NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
+                                /******Logic 2: To convert 6 digit after decimal to 4 digit after decimal */
+                                /*NewSC_PIN: Math.round(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat * 10000) / 10000, NewSC_PriceFile: Math.round(standardGasPrice[0]['13.0000'] * 10000) / 10000,
+                                NewR1_PIN: Math.round(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat * 10000) / 10000, NewR1_PriceFile: Math.round(standardGasPrice[0]['17.0000'] * 10000) / 10000,*/
+                                /******Logic 3: To convert 6 digit after decimal to 4 digit after decimal */
+                                NewSC_PIN: (Number(dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat) + 1e-10).toFixed(4), NewSC_PriceFile: (Number(standardGasPrice[0]['13.0000']) + 1e-10).toFixed(4),
+                                NewR1_PIN: (Number(dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat) + 1e-10).toFixed(4), NewR1_PriceFile: (Number(standardGasPrice[0]['17.0000']) + 1e-10).toFixed(4),
+                                NewR2_PIN: 'N/A', NewR2_PriceFile: 'N/A',
+                                NewR3_PIN: 'N/A', NewR3_PriceFile: 'N/A',
+                                NewR4_PIN: 'N/A', NewR4_PriceFile: 'N/A',
+                                New_SC_Rates_Correct: '',
+
+                                OldAnnualCost: dualFuelBucket[property].Gas_Total_Old_Cost,
+                                NewAnnualCost: dualFuelBucket[property].Gas_Total_New_Cost,
+                                ChangeDifference: Number(dualFuelBucket[property].Gas_Total_New_Cost - dualFuelBucket[property].Gas_Total_Old_Cost),
+                                ChangeAmountCorrect: '',
+                                AreFrontPageCalculationCorrect: '',
+
+                                PIN_Personal_Projection: dualFuelBucket[property].Gas_Total_New_Cost,
+                                Calculated_Personal_Projection: totalGasCurrentCost(),
+                                Difference: ((totalGasCurrentCost() / dualFuelBucket[property].Gas_Total_New_Cost) * 100).toFixed(2) + '%',
+                                // Difference: totalGasCurrentCost() / (dualFuelBucket[property].Gas_Total_New_Cost),
+                                // Difference: (dualFuelBucket[property].Gas_Annual_Usage * standardGasPrice[0]['17.0000']) / (dualFuelBucket[property].Gas_Total_New_Cost),
+
+                                SimilarTariff: dualFuelBucket[property].Gas_Cheapest_Similar_Tariff,
+                                SimilarMeter: cheapestSimilarGasMeter,
+                                Calculated_Similar_Projection: totalGasSimilarCost(),
+                                //Calculated_Similar_Saving: totalGasSimilarCost() - totalGasCurrentCost(),
+                                Calculated_Similar_Saving: calculateGasSimilarSaving(),
+                                //Similar_Saving_Correct: (((gasCheapestSimilarSaving) / (totalGasSimilarCost() - totalGasCurrentCost())) * 100).toFixed(2) + '%',
+                                Similar_Saving_Correct: isGasSimilarSavingCorrect(),
+
+                                OverallTariff: dualFuelBucket[property].Gas_Cheapest_Overall_Tariff,
+                                OverallMeter: cheapestOverallGasMeter,
+                                Calculated_Overall_Projection: totalGasOverallCost(),
+                                // Calculated_Overall_Saving: totalGasOverallCost() - totalGasCurrentCost(),
+                                Calculated_Overall_Saving: calculateGasOverallSaving(),
+                                //Overall_Saving_Correct: (((gasCheapestOverallSaving) / (totalGasOverallCost() - totalGasCurrentCost())) * 100).toFixed(2) + '%',
+                                Overall_Saving_Correct: isGasOverallSavingCorrect(),
+
+                                PresentmentCorrect: '',
+                                PassFailUnsure: '',
+                                Comments: '',
+                            }
+                            newDualFuelBucketData.push(gasProofingSheetObject);
+                            //Single Gas Object finish here
+                        }
+                        else {
+                            console.log(`Gas Account ${dualFuelBucket[property].Gas_Customer_No} Excluded from calculation, Unable to find Final Price`);
+                        }
+                    }
+                    else {
+                        console.log(`Gas Account ${dualFuelBucket[property].Gas_Customer_No} Excluded from Calculation, Unable to find Payment Method`);
+                    }
+                }
+                else {
+                    console.log(` Gas Account ${dualFuelBucket[property].Gas_Customer_No} Excluded from Calculation, No Tariff available`);
+                }
+            }
+            else {
+                console.log(` Gas Account ${dualFuelBucket[property].Gas_Customer_No} Excluded from calculation, Current Tariff is Fixed`);
+            }
+        }
         else {
-            console.log(`zone missing for Ele A/c ${dualFuelBucket[property].Elec_Customer_No} `);
+            console.log(`zone missing for Ele A/c${dualFuelBucket[property].Elec_Customer_No} Gas A/c ${dualFuelBucket[property].Gas_Customer_No} `);
         }
     }
 
@@ -709,7 +975,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/WHP Elec Only ODP Email.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/ODP DF POST.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
