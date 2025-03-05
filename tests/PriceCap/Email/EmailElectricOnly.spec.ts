@@ -8,7 +8,7 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 test('DualFuel test', async ({ page }) => {
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Warmer Home Plan - Gas Only - DD - Email.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Email/Pay As You Go - Multi - Elec Only -  Email.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
@@ -702,7 +702,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/WHP Elec Only ODP Email.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/PAYG Multi Elec Only EMAIL.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
