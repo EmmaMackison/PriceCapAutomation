@@ -8,19 +8,18 @@ import { ElectircMeterActions } from "../../../Actions/electricActions.ts";
 test('DualFuel test', async ({ page }) => {
     // Step 1: Read the databucket file
     annotate('Get sorted testing bucket file');
-    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Split Payment - Multi - Dual Fuel - Post.csv"), {
+    const dualFuelBucket = parse(fs.readFileSync("src/testdata/testbuckets/Post/Simpler Energy - Multi - Dual Fuel - ODP - Post.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",      
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Live Run Calculator April 2025 v3 - Rohit - Tariff Info & Rates.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator - July 2025 - Rohit - Tariff Info & Rates.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
     });
-
     //Step 3: Declare new Proofing Object prototype 
     interface ProofingObject {
         Date: string, Checker: string, Page: string,
@@ -28,7 +27,7 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
         //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
-        NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
+       // NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -610,12 +609,12 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
                                 //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
-                                NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
+                                /*NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
                                 NewR1_KAE: Math.round(standardElectricPrice[0]['16'] * 10000) / 10000,
                                 NewR2_KAE: Math.round(standardElectricPrice[0]['19'] * 10000) / 10000,
                                 NewR3_KAE: Math.round(standardElectricPrice[0]['22'] * 10000) / 10000,
                                 NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
-                                New_KAE_SC_Rates_Correct: '',
+                                New_KAE_SC_Rates_Correct: '',*/
                                 /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: dualFuelBucket[property].Elec_New_Stdg_Chrg, NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
@@ -895,12 +894,12 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
                                 //Below 5 values only for Live Run to check correct price on KAE (Excluding VAT) in KAE.Need to remove and add comments according to need  
-                                NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
+                               /*NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
                                 NewR1_KAE: Math.round(standardGasPrice[0]['16'] * 10000) / 10000,
                                 NewR2_KAE: 'N/A',
                                 NewR3_KAE: 'N/A',
                                 NewR4_KAE: 'N/A',
-                                New_KAE_SC_Rates_Correct: '',
+                                New_KAE_SC_Rates_Correct: '',*/
                                 /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
@@ -975,7 +974,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/Multi DF Split Payment POST.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/Multi DF ODP POST.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }

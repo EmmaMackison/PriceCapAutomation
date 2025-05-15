@@ -15,7 +15,7 @@ test('DualFuel test', async ({ page }) => {
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Live Run Calculator April 2025 v3 - Rohit - Tariff Info & Rates.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator - July 2025 - Rohit - Tariff Info & Rates.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
@@ -28,7 +28,7 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
         //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
-        NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
+       // NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -50,7 +50,7 @@ test('DualFuel test', async ({ page }) => {
     const newDualFuelBucketData: Object[] = [];
     //Step:5 Navigate thorough each row,received  from Step 1: data bucket and perform calculation
     /* cheapestTariffs array contain all the prices used for cheapest similar and overall, It is highly possible that CTM will be changed every time, so if new priced added then 
-    it should be added to this array as well*/
+    it should be added to this array as well, also while adding new tariff need to make sure how does it spelled in data file and price file*/
     const cheapestTariffs: string[] = ['1 Year Fixed', '1 Year Fixed - Economy 7', '1 Year Fixed Loyalty', '1 Year Fixed Loyalty - Economy 7',
         '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover - Economy 7', '1 Year Fixed + Greener Electricity', '1 Year Fixed + Greener Electricity - Economy 7', '2 Year Fixed + Heating Control',
         '2 Year Fixed + Heating Control - Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
@@ -612,12 +612,12 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Elec_Payment_Method,
                                 // Payment_Method:elePayMethod,
                                 //Below 5 values only for Live Run Testing to check correct price(Excluding VAT) in KAE   
-                                NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
+                                /*NewSC_KAE: Math.round(standardElectricPrice[0]['12'] * 10000) / 10000,
                                 NewR1_KAE: Math.round(standardElectricPrice[0]['16'] * 10000) / 10000,
                                 NewR2_KAE: Math.round(standardElectricPrice[0]['19'] * 10000) / 10000,
                                 NewR3_KAE: Math.round(standardElectricPrice[0]['22'] * 10000) / 10000,
                                 NewR4_KAE: Math.round(standardElectricPrice[0]['25'] * 10000) / 10000,
-                                New_KAE_SC_Rates_Correct: '',
+                                New_KAE_SC_Rates_Correct: '',*/
                                 /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: Number(dualFuelBucket[property].Elec_New_Stdg_Chrg).toFixed(4), NewSC_PriceFile: Number(standardElectricPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: Number(dualFuelBucket[property].Elec_New_Unit_1_Inc_Vat).toFixed(4), NewR1_PriceFile: Number(standardElectricPrice[0]['17.0000']).toFixed(4),
