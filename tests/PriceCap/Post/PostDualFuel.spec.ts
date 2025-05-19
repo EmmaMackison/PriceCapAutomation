@@ -15,7 +15,7 @@ test('DualFuel test', async ({ page }) => {
     });
     //Step2:Read the latest price 
     annotate('Getting price data');
-    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator - July 2025 - Rohit - Tariff Info & Rates.csv"), {
+    const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator v2 - July 2025 Rohit - Tariff Info & Rates.csv"), {
         columns: true,
         skip_empty_lines: true,
         //delimiter: ";",
@@ -27,7 +27,7 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
         //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
-       // NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
+        // NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
@@ -52,9 +52,8 @@ test('DualFuel test', async ({ page }) => {
     it should be added to this array as well, also while adding new tariff need to make sure how does it spelled in data file and price file*/
     const cheapestTariffs: string[] = ['1 Year Fixed', '1 Year Fixed - Economy 7', '1 Year Fixed Loyalty', '1 Year Fixed Loyalty - Economy 7',
         '1 Year Fixed + Boiler Cover', '1 Year Fixed + Boiler Cover - Economy 7', '1 Year Fixed + Greener Electricity', '1 Year Fixed + Greener Electricity - Economy 7', '2 Year Fixed + Heating Control',
-        '2 Year Fixed + Heating Control - Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7',
-        '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7', 'Extended Fixed', 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco', '2 Year Fixed + Heating Control',
-    ];
+        '2 Year Fixed + Heating Control - Economy 7', '1 Year Fixed Loyalty - Domestic Economy', '2 Year Fixed Energy - Economy 7', '3 Year Fixed - Economy 7', '1 Year Fixed + Boiler Cover - Domestic Economy',
+        '3 Year Fixed v5 EPG', '3 Year Fixed v5 EPG - Economy 7', 'Extended Fixed', 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco', '2 Year Fixed + Heating Control'];
     //multiRateElectricMeters array is to identify correct meter type for multi rate meters  
     const multiRateElectircMeters: string[] = ['Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', '2 Rate (Heating)', '2 Rate',
         'THTC', 'Flex Rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)',
@@ -63,7 +62,7 @@ test('DualFuel test', async ({ page }) => {
     in below related arrays as well to make sure its been picked up in calculation*/
     const standardMeters = ['Standard', '1 Year Fixed', '1 Year Fixed Loyalty', '1 Year Fixed + Boiler Cover', '1 Year Fixed + Greener Electricity', 'Extended Fixed'];
     const twoRateMeters = ['Economy 7', '1 Year Fixed Loyalty - Economy 7', 'Economy 10', 'Domestic Economy', 'Smart Economy 9', 'THTC', 'Flex Rate', '2 Rate (Heating)', '2 Rate',
-        'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover Economy 7', '1 Year Fixed + Greener Electricity Economy 7', 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'];
+        'Heatwise 2 Rate', '1 Year Fixed Loyalty Economy 7', '1 Year Fixed + Boiler Cover - Economy 7', '1 Year Fixed + Greener Electricity Economy 7', 'OVO Extended Fixed 26 Feb 2025 E7 / DomEco'];
     const threeRateMeters = ['3 rate', 'Superdeal', '3 Rate (Heating)', '3 Rate (E&W, Heating)', 'Economy & Heating Load', 'Heatwise 3 Rate', 'Region Specific'];
     const fourRateMeters = '4 rate';
 
@@ -147,6 +146,7 @@ test('DualFuel test', async ({ page }) => {
                     /* ***NOTE**** Below If condition will make sure if cutomers cheapest overall is 1 year fixed loyalt-domestic economy then it will be calculated
                     according to 1 year fixed loyalty economy 7*/
                     if (cheapestOverallEle === "1 Year Fixed Loyalty - Domestic Economy") { cheapestOverallEle = "1 Year Fixed Loyalty - Economy 7"; }
+                    if (cheapestOverallEle === "1 Year Fixed + Boiler Cover - Domestic Economy") { cheapestOverallEle = "1 Year Fixed + Boiler Cover - Economy 7"; }
                 });
                 if (overallChecker) {
                     //First Logic to find out Extended Fixed E7 /Domestic Economy
@@ -894,12 +894,12 @@ test('DualFuel test', async ({ page }) => {
                                 Payment_Method: dualFuelBucket[property].Gas_Payment_Method,
 
                                 //Below 5 values only for Live Run to check correct price on KAE (Excluding VAT) in KAE.Need to remove and add comments according to need  
-                               /*NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
-                                NewR1_KAE: Math.round(standardGasPrice[0]['16'] * 10000) / 10000,
-                                NewR2_KAE: 'N/A',
-                                NewR3_KAE: 'N/A',
-                                NewR4_KAE: 'N/A',
-                                New_KAE_SC_Rates_Correct: '',*/
+                                /*NewSC_KAE: Math.round(standardGasPrice[0]['12'] * 10000) / 10000,
+                                 NewR1_KAE: Math.round(standardGasPrice[0]['16'] * 10000) / 10000,
+                                 NewR2_KAE: 'N/A',
+                                 NewR3_KAE: 'N/A',
+                                 NewR4_KAE: 'N/A',
+                                 New_KAE_SC_Rates_Correct: '',*/
                                 /******Logic 1: To convert 6 digit after decimal to 4 digit after decimal */
                                 /*NewSC_PIN: dualFuelBucket[property].Gas_New_Stdg_Chrg_Inc_Vat, NewSC_PriceFile: Number(standardGasPrice[0]['13.0000']).toFixed(4),
                                 NewR1_PIN: dualFuelBucket[property].Gas_New_Unit_1_Inc_Vat, NewR1_PriceFile: Number(standardGasPrice[0]['17.0000']).toFixed(4),*/
@@ -974,7 +974,7 @@ test('DualFuel test', async ({ page }) => {
     // // //Below code to write final arrays to file
     if (newDualFuelBucketData.length) {
         const csvFromArrayOfObjects = convertArrayToCSV(newDualFuelBucketData);
-        fs.writeFile('CSV Output/Multi DF ODP POST.csv', csvFromArrayOfObjects, err => {
+        fs.writeFile('CSV Output/Multi ODP DF POST.csv', csvFromArrayOfObjects, err => {
             if (err) {
                 console.log(18, err);
             }
