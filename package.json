@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "convert-array-to-csv": "^2.0.0",
-    "csv-parse": "^5.6.0"
+    "csv-parse": "^5.6.0",
+    "csv-parser": "^3.2.0"
   }
 }
