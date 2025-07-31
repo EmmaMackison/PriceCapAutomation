@@ -13,6 +13,7 @@ test('DualFuel test', async ({ page }) => {
         skip_empty_lines: true,
         //delimiter: ";",      
     });
+    //console.log(dualFuelBucket);
     //Step2:Read the latest price 
     annotate('Getting price data');
     const newPriceData = parse(fs.readFileSync("src/testdata/newpricefiles/Dry Run Calculator v2 - July 2025 Rohit - Tariff Info & Rates.csv"), {
@@ -28,7 +29,7 @@ test('DualFuel test', async ({ page }) => {
         Beyond_Eligibility: string, Marketing_Preference: string, Marketing_Consent_Correct: string,
         GSP: string, Fuel: string, Tariff: string, Meter_Type: string, Payment_Method: string,
         //Below fields are ment for Live Run to check correct price on KAE.Need to remove and add comments according to need
-       // NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
+        //NewSC_KAE: any, NewR1_KAE: any, NewR2_KAE: any, NewR3_KAE: any, NewR4_KAE: any, New_KAE_SC_Rates_Correct: any,
 
         NewSC_PIN: any, NewSC_PriceFile: any,
         NewR1_PIN: any, NewR1_PriceFile: any,
