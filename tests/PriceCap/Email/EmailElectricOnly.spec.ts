@@ -179,7 +179,7 @@ test('DualFuel test', async ({ page }) => {
                         return (el[3] === cheapestOverallEleMeter && el[4] === 'Electric');
                     });
                 }
-                //Capturing Ceapest overall complete here
+                //THIS IS FOR TEST Capturing Ceapest overall complete here
                 //Capturing Current electric meter and current price data based on this meter
                 if (eleTariffName === 'Simpler Energy' || eleTariffName === 'Warmer Home Plan' || eleTariffName === 'Pay As You Go') { eleTariffName = 'Standard'; }
                 else {
